@@ -1,76 +1,34 @@
 /* ============================================================== */
-/* OmniSurge Design Tokens — Dual-Theme Architecture              */
-/* Dark Mode (Deep Obsidian & Cyan) + Light Mode (Crisp Paper)    */
+/* OmniSurge Design Tokens — Kabuto / Ripar Editorial Dark System   */
+/* Locked to single dark theme: #0A0A0A bg, #111111 surfaces,      */
+/* #EDEDED text, #8A8A8A secondary, ONE accent: #E23B3B red        */
 /* ============================================================== */
 
-:root,
-:root[data-theme="dark"] {
-  /* Backgrounds */
-  --bg-page: #09090B;
-  --bg-surface: #121215;
-  --bg-card: #18181C;
-  --bg-card-hover: #222227;
-  --bg-input: #121215;
+:root {
+  /* Surfaces & Backgrounds */
+  --bg-page: #0A0A0A;
+  --bg-surface: #111111;
+  --bg-card: #111111;
+  --bg-card-hover: #141414;
+  --bg-input: #0A0A0A;
 
-  /* Borders */
-  --border-subtle: #27272A;
-  --border-card: #2E2E33;
-  --border-active: #06B6D4;
+  /* Hairlines & Dividers */
+  --border-subtle: #1E1E1E;
+  --border-card: #1E1E1E;
+  --border-active: #E23B3B;
+  --hair: #1E1E1E;
+  --hair-strong: rgba(255, 255, 255, 0.12);
 
-  /* Accents */
-  --accent-cyan: #06B6D4;
-  --accent-cyan-hover: #0891B2;
-  --accent-emerald: #10B981;
-  --accent-white: #FFFFFF;
+  /* Typography Colors */
+  --text-primary: #EDEDED;
+  --text-secondary: #8A8A8A;
+  --text-muted: #555555;
 
-  /* Text */
-  --text-primary: #FFFFFF;
-  --text-secondary: #A1A1AA;
-  --text-muted: #71717A;
-}
+  /* Single Restrained Accent Color */
+  --accent: #E23B3B;
+  --accent-hover: #C93232;
+  --accent-wash: rgba(226, 59, 59, 0.10);
 
-:root[data-theme="light"] {
-  /* Backgrounds */
-  --bg-page: #F8FAFC;
-  --bg-surface: #FFFFFF;
-  --bg-card: #F1F5F9;
-  --bg-card-hover: #E2E8F0;
-  --bg-input: #FFFFFF;
-
-  /* Borders */
-  --border-subtle: #E2E8F0;
-  --border-card: #CBD5E1;
-  --border-active: #0891B2;
-
-  /* Accents */
-  --accent-cyan: #0891B2;
-  --accent-cyan-hover: #0E7490;
-  --accent-emerald: #059669;
-  --accent-white: #0F172A;
-
-  /* Text */
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #64748B;
-}
-
-/* Global Theme Transition */
-html,
-body,
-div,
-header,
-footer,
-section,
-nav,
-button,
-input,
-span,
-p,
-h1,
-h2,
-h3,
-h4 {
-  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Geometry: strictly 0px to 2px max radius */
+  --radius: 2px;
 }

@@ -9,10 +9,7 @@ export function Footer() {
     const updateTime = () => {
       const d = new Date();
       setTimeStr(
-        d.toLocaleTimeString("en-US", { hour12: false }) +
-          " UTC" +
-          (d.getTimezoneOffset() <= 0 ? "+" : "-") +
-          Math.abs(Math.floor(d.getTimezoneOffset() / 60))
+        d.toLocaleTimeString("en-US", { hour12: false }) + " UTC"
       );
     };
     updateTime();
@@ -25,66 +22,64 @@ export function Footer() {
   };
 
   const links = [
-    { label: "Base Sepolia Explorer", href: "https://sepolia.basescan.org" },
-    { label: "Unichain Sepolia Explorer", href: "https://sepolia.uniscan.xyz" },
-    { label: "Reactive Lasna Explorer", href: "https://lasna.reactscan.net" },
-    { label: "Shannon Audit (100/100)", href: "#audit" },
+    { label: "BASE SEPOLIA EXPLORER", href: "https://sepolia.basescan.org" },
+    { label: "UNICHAIN SEPOLIA EXPLORER", href: "https://sepolia.uniscan.xyz" },
+    { label: "REACTIVE LASNA EXPLORER", href: "https://lasna.reactscan.net" },
+    { label: "SHANNON AUDIT (100/100)", href: "#audit" },
   ];
 
   return (
-    <footer className="relative bg-[var(--bg-page)] text-[var(--text-primary)] pt-16 pb-10 border-t border-[var(--border-subtle)] z-20">
+    <footer className="relative bg-[#0A0A0A] text-[#EDEDED] pt-16 pb-12 border-t border-[#1E1E1E] z-20">
       <div className="shell-container">
-        {/* Top Header Row */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-8 border-b border-[var(--border-subtle)] gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[var(--accent-cyan)] flex items-center justify-center font-display font-black text-[#09090B] text-xs shadow-sm">
-              Ω
-            </div>
-            <div>
-              <span className="font-display font-bold text-base text-[var(--text-primary)]">OMNISURGE PROTOCOL</span>
-              <span className="block font-mono text-xs text-[var(--text-muted)]">Autonomous Just-In-Time Liquidity Engine</span>
-            </div>
+        {/* Main Footer Row */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-8 border-b border-[#1E1E1E] gap-6">
+          <div className="space-y-1">
+            <span className="font-mono text-14 font-bold text-[#EDEDED] uppercase tracking-wider block">
+              OMNISURGE PROTOCOL
+            </span>
+            <span className="font-mono text-12 text-[#8A8A8A] block">
+              Autonomous Just-In-Time Concentrated Liquidity Rebalancer
+            </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-5 font-mono text-xs text-[var(--text-secondary)]">
+          {/* Plain Monospace Links with Underline on Hover Only (NO dot bullets) */}
+          <div className="flex flex-wrap items-center gap-6 font-mono text-12 text-[#8A8A8A]">
             {links.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
                 target="_blank"
                 rel="noreferrer"
-                className="hover:text-[var(--accent-cyan)] flex items-center gap-1.5 transition-colors"
+                className="hover:underline hover:text-[#EDEDED] transition-colors"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-emerald)]" />
-                <span>{link.label}</span>
+                {link.label}
               </a>
             ))}
           </div>
 
           <button
             onClick={scrollToTop}
-            className="flex items-center gap-2 font-mono text-xs text-[var(--accent-cyan)] hover:text-[var(--text-primary)] px-3 py-1.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] transition-colors"
+            className="btn-rect-ghost text-12 !py-2 !px-4"
           >
-            <span>BACK TO TOP</span>
-            <span className="text-sm">↑</span>
+            BACK TO TOP ↑
           </button>
         </div>
 
-        {/* Wordmark */}
-        <div className="py-8 text-center select-none overflow-hidden">
-          <h2 className="font-display text-[clamp(2.5rem,10vw,8rem)] leading-[0.85] tracking-tighter text-[var(--border-subtle)] uppercase font-black opacity-60">
+        {/* Minimal Wordmark */}
+        <div className="py-12 select-none overflow-hidden text-center">
+          <span className="font-sans text-56 sm:text-80 lg:text-120 leading-none tracking-tighter text-[#141414] uppercase font-black block">
             OMNISURGE
-          </h2>
+          </span>
         </div>
 
         {/* Bottom Utility Strip */}
-        <div className="pt-6 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-center justify-between font-mono text-xs text-[var(--text-muted)] gap-3">
-          <div className="flex items-center gap-3">
+        <div className="pt-6 border-t border-[#1E1E1E] flex flex-col sm:flex-row items-center justify-between font-mono text-12 text-[#555555] gap-3">
+          <div className="flex items-center gap-4">
             <span>NETWORK CLOCK: {timeStr}</span>
-            <span>•</span>
-            <span className="text-[var(--accent-emerald)] font-semibold">ALL SYSTEMS OPERATIONAL</span>
+            <span>/</span>
+            <span className="text-[#8A8A8A]">SYSTEMS OPERATIONAL</span>
           </div>
-          <div>© 2026 OmniSurge Labs. Built for Sub-Second Finality.</div>
+          <div>© 2026 OMNISURGE LABS • LOW LATENCY DEFI</div>
         </div>
       </div>
     </footer>

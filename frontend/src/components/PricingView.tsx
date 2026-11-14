@@ -1,53 +1,52 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { motion } from "framer-motion";
 
 export function PricingView() {
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [billingCycle, setBillingCycle] = useState<"MONTHLY" | "ANNUAL">("MONTHLY");
 
   const plans = [
     {
+      num: "01",
       name: "STANDARD NODE",
-      desc: "For individual arbitrageurs and single-pool concentrated liquidity providers.",
-      priceMonthly: "$15",
-      priceAnnual: "$12",
-      featured: false,
+      price: billingCycle === "MONTHLY" ? "$15" : "$12",
+      period: "PER MONTH",
+      desc: "For single-pool concentrated liquidity surveillance and autonomous execution.",
       features: [
         "Base Sepolia (200ms) mempool surveillance",
-        "Up to 3 active Uniswap V3/V4 pools",
+        "Up to 3 active concentrated pools",
         "Reactive Lasna standard execution lane",
         "Slippage mitigation up to 50%",
         "Standard JSON-RPC latency telemetry",
       ],
       cta: "START STANDARD NODE →",
+      isPrimary: false,
     },
     {
+      num: "02",
       name: "PROFESSIONAL PRO",
-      desc: "Maximum speed for high-volume automated market makers and flash rebalancers.",
-      priceMonthly: "$28",
-      priceAnnual: "$22",
-      featured: true,
+      price: billingCycle === "MONTHLY" ? "$28" : "$22",
+      period: "PER MONTH",
+      desc: "Maximum speed for high-volume automated rebalancers and cross-chain flashes.",
       features: [
         "Unichain + Base dual-chain priority",
         "Unlimited active concentrated positions",
         "Sub-second Reactive callback priority lane",
         "Slippage mitigation up to 88.4%",
         "Instant atomic flash rebalancing",
-        "24/7 dedicated Telegram & Discord alerts",
+        "Automated Telegram & Discord alerts",
       ],
       cta: "ACTIVATE PRO LANE →",
+      isPrimary: true,
     },
     {
+      num: "03",
       name: "INSTITUTIONAL ENTERPRISE",
-      desc: "Tailored private infrastructure for hedge funds and high-frequency market makers.",
-      priceMonthly: "CUSTOM",
-      priceAnnual: "CUSTOM",
-      featured: false,
+      price: "CUSTOM",
+      period: "BESPOKE AGREEMENT",
+      desc: "Dedicated infrastructure for market makers and institutional vaults.",
       features: [
         "Co-located Reactive Network validator node",
         "Private mempool flash liquidity hooks",
@@ -56,163 +55,134 @@ export function PricingView() {
         "Direct integration with institutional custody",
       ],
       cta: "CONTACT PROTOCOL TEAM →",
-    },
-  ];
-
-  const faqs = [
-    {
-      q: "How does OmniSurge eliminate impermanent loss?",
-      a: "Traditional liquidity stays in the pool exposed to market drift. OmniSurge uses Reactive Network to inject concentrated depth Just-In-Time right when a swap is pending, and immediately retracts it once the swap settles, earning fees with virtually zero market exposure.",
-    },
-    {
-      q: "What networks are currently supported?",
-      a: "OmniSurge is active on Base Sepolia (200ms blocks) and Unichain Sepolia (1s blocks), orchestrated by Reactive Lasna Testnet. Mainnet deployment will support Base, Unichain, Arbitrum, and Ethereum mainnets.",
-    },
-    {
-      q: "Can I cancel or upgrade my tier at any time?",
-      a: "Yes. All subscriptions are handled via Web3 smart contract streams. Upgrades take effect immediately across all reactive oracle listeners.",
-    },
-    {
-      q: "How are protocol contracts verified?",
-      a: "All OmniSurge contracts have undergone formal security verification by Shannon, receiving a 100/100 audit score with non-reentrant execution and zero loss guarantees.",
+      isPrimary: false,
     },
   ];
 
   return (
-    <div className="relative min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] overflow-x-hidden">
+    <div className="min-h-screen bg-[#0A0A0A] text-[#EDEDED] flex flex-col">
       <Header />
 
-      <main className="relative z-10 pt-28 pb-28 shell-container space-y-12">
-        {/* Header Title & Billing Toggle */}
-        <div className="text-center max-w-3xl mx-auto space-y-4 pt-4">
-          <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-[var(--text-primary)] leading-[1.05]">
-            Choose Your <br />
-            <span className="text-[var(--accent-cyan)] font-normal">Deployment</span> Tier.
-          </h1>
+      <main className="flex-1 pt-32 pb-24">
+        <div className="shell-container space-y-16">
+          {/* Header & Billing Cycle Controls */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-[#1E1E1E] pb-8">
+            <div>
+              <div className="flex items-center gap-2 font-mono text-12 text-[#8A8A8A] mb-2">
+                <span className="text-[#E23B3B] font-bold">( 03 )</span>
+                <span className="uppercase tracking-wider">DEPLOYMENT TIERS & ACCESS</span>
+              </div>
+              <h1 className="font-sans text-40 sm:text-56 font-bold text-[#EDEDED] uppercase">
+                CHOOSE YOUR TIER.
+              </h1>
+              <p className="font-sans text-14 text-[#8A8A8A] mt-2 max-w-xl">
+                Scale concentrated liquidity injection with sub-second finality on Base Sepolia and Unichain.
+              </p>
+            </div>
 
-          <p className="font-sans text-sm sm:text-base text-[var(--text-secondary)] max-w-xl mx-auto">
-            Scale your concentrated liquidity injection with sub-second finality on Base Sepolia and Unichain.
-          </p>
-
-          {/* Monthly / Annual Toggle */}
-          <div className="flex items-center justify-center gap-3 pt-2">
-            <div className="flex items-center p-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] font-mono text-xs">
+            {/* Rectangular Billing Cycle Switcher */}
+            <div className="flex items-center border border-[#1E1E1E] p-1 font-mono text-12 bg-[#0A0A0A]">
               <button
-                onClick={() => setBillingCycle("monthly")}
-                className={`px-3 py-1.5 rounded-md font-bold transition-colors ${
-                  billingCycle === "monthly"
-                    ? "bg-[var(--accent-cyan)] text-[#09090B]"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                onClick={() => setBillingCycle("MONTHLY")}
+                className={`px-3 py-1.5 rounded-[2px] transition-colors uppercase ${
+                  billingCycle === "MONTHLY"
+                    ? "bg-[#1E1E1E] text-[#EDEDED] font-bold"
+                    : "text-[#8A8A8A] hover:text-[#EDEDED]"
                 }`}
               >
                 Monthly
               </button>
               <button
-                onClick={() => setBillingCycle("annual")}
-                className={`px-3 py-1.5 rounded-md font-bold transition-colors ${
-                  billingCycle === "annual"
-                    ? "bg-[var(--accent-cyan)] text-[#09090B]"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                onClick={() => setBillingCycle("ANNUAL")}
+                className={`px-3 py-1.5 rounded-[2px] transition-colors uppercase ${
+                  billingCycle === "ANNUAL"
+                    ? "bg-[#1E1E1E] text-[#EDEDED] font-bold"
+                    : "text-[#8A8A8A] hover:text-[#EDEDED]"
                 }`}
               >
                 Annual (20% Off)
               </button>
             </div>
           </div>
-        </div>
 
-        {/* 3 Tier Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-          {plans.map((plan) => (
-            <motion.div
-              key={plan.name}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              className={`rounded-2xl p-7 flex flex-col justify-between transition-all shadow-sm ${
-                plan.featured
-                  ? "bg-[var(--bg-card)] border-2 border-[var(--accent-cyan)]"
-                  : "bg-[var(--bg-surface)] border border-[var(--border-subtle)]"
-              }`}
-            >
-              <div className="space-y-5">
-                <div>
-                  <h3 className="font-display text-lg font-bold text-[var(--text-primary)]">
-                    {plan.name}
-                  </h3>
-                  <p className="font-sans text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
+          {/* Editorial Tier Columns Separated by Hairline Borders */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 border border-[#1E1E1E] bg-[#0A0A0A]">
+            {plans.map((plan, idx) => (
+              <div
+                key={plan.name}
+                className={`p-8 sm:p-10 flex flex-col justify-between border-b lg:border-b-0 ${
+                  idx < 2 ? "lg:border-r border-[#1E1E1E]" : ""
+                } ${plan.isPrimary ? "bg-[#111111]" : "bg-[#0A0A0A]"}`}
+              >
+                <div className="space-y-6">
+                  <div className="flex justify-between items-baseline font-mono text-12">
+                    <span className="text-[#E23B3B] font-bold">({plan.num})</span>
+                    <span className="text-[#8A8A8A] uppercase">{plan.name}</span>
+                  </div>
+
+                  <div>
+                    <span className="font-mono text-40 font-bold text-[#EDEDED] tnum leading-none block">
+                      {plan.price}
+                    </span>
+                    <span className="font-mono text-12 text-[#8A8A8A] uppercase mt-2 block">
+                      {plan.period}
+                    </span>
+                  </div>
+
+                  <p className="font-sans text-14 text-[#8A8A8A] leading-relaxed border-t border-b border-[#1E1E1E] py-4">
                     {plan.desc}
                   </p>
-                </div>
 
-                <div className="pt-2 pb-4 border-b border-[var(--border-subtle)]">
-                  <div className="font-display text-4xl font-black text-[var(--text-primary)]">
-                    {billingCycle === "monthly" ? plan.priceMonthly : plan.priceAnnual}
+                  <div className="space-y-3 font-mono text-12 text-[#8A8A8A]">
+                    <span className="text-[#EDEDED] font-bold block uppercase">
+                      INCLUDED CAPABILITIES:
+                    </span>
+                    {plan.features.map((feat) => (
+                      <div key={feat} className="flex items-start gap-2">
+                        <span className="text-[#E23B3B] font-bold">+</span>
+                        <span className="text-[#EDEDED]">{feat}</span>
+                      </div>
+                    ))}
                   </div>
-                  <span className="font-mono text-xs text-[var(--text-muted)]">
-                    / month, billed {billingCycle}
-                  </span>
                 </div>
 
-                <div className="space-y-2.5 font-mono text-xs text-[var(--text-secondary)]">
-                  <span className="text-[11px] font-bold text-[var(--text-primary)] uppercase block">
-                    INCLUDED CAPABILITIES:
-                  </span>
-                  {plan.features.map((f) => (
-                    <div key={f} className="flex items-start gap-2">
-                      <span className="text-[var(--accent-emerald)] font-bold">✓</span>
-                      <span>{f}</span>
-                    </div>
-                  ))}
+                <div className="pt-8">
+                  <button
+                    className={`w-full ${plan.isPrimary ? "btn-rect-accent" : "btn-rect-ghost"}`}
+                  >
+                    {plan.cta}
+                  </button>
                 </div>
               </div>
-
-              <div className="pt-6">
-                <Link
-                  href="/dashboard"
-                  className={`w-full block text-center font-display font-bold text-xs uppercase py-3 rounded-lg transition-colors ${
-                    plan.featured
-                      ? "btn-solid-primary"
-                      : "btn-solid-secondary"
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* FAQ Section */}
-        <div className="max-w-3xl mx-auto space-y-6 pt-10 border-t border-[var(--border-subtle)]">
-          <div className="text-center space-y-1">
-            <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] uppercase">
-              Frequently Answered Questions
-            </h2>
-            <p className="font-sans text-xs text-[var(--text-secondary)]">
-              Common queries regarding protocol execution and settlement.
-            </p>
+            ))}
           </div>
 
-          <div className="space-y-3 font-mono text-xs">
-            {faqs.map((faq, idx) => {
-              const isOpen = openFaq === idx;
-              return (
-                <div
-                  key={faq.q}
-                  className="rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] p-4 cursor-pointer"
-                  onClick={() => setOpenFaq(isOpen ? null : idx)}
-                >
-                  <div className="flex justify-between items-center text-[var(--text-primary)] font-bold">
-                    <span>{faq.q}</span>
-                    <span className="text-[var(--accent-cyan)] text-base">{isOpen ? "−" : "+"}</span>
-                  </div>
-                  {isOpen && (
-                    <p className="mt-3 text-[var(--text-secondary)] font-sans text-xs leading-relaxed pt-2 border-t border-[var(--border-subtle)]">
-                      {faq.a}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
+          {/* Monospace FAQ Table */}
+          <div className="space-y-6 pt-10 border-t border-[#1E1E1E]">
+            <div className="flex items-center gap-2 font-mono text-12 text-[#8A8A8A]">
+              <span className="text-[#E23B3B] font-bold">( FAQ )</span>
+              <span className="uppercase tracking-wider">FREQUENTLY ANSWERED QUESTIONS</span>
+            </div>
+
+            <div className="border border-[#1E1E1E] divide-y divide-[#1E1E1E] font-mono text-12 bg-[#0A0A0A]">
+              <div className="p-6 space-y-2">
+                <span className="text-[#EDEDED] font-bold block">
+                  Q: HOW DOES OMNISURGE ELIMINATE IMPERMANENT LOSS?
+                </span>
+                <p className="text-[#8A8A8A] font-sans text-14">
+                  OmniSurge deploys concentrated liquidity only for the duration of the swap execution block and withdraws both the principal and harvested LP fees within the same block cycle, leaving zero capital exposed to directional price drift.
+                </p>
+              </div>
+
+              <div className="p-6 space-y-2">
+                <span className="text-[#EDEDED] font-bold block">
+                  Q: CAN I DEPLOY ON CUSTOM LIQUIDITY POOLS?
+                </span>
+                <p className="text-[#8A8A8A] font-sans text-14">
+                  Yes. Custom Uniswap v3/v4 pools on Base Sepolia and Unichain Sepolia can be registered through the DestinationCallback contract by authorized owners.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </main>

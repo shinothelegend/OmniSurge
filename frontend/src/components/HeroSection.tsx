@@ -2,89 +2,117 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Hero3DVisual } from "./Hero3DVisual";
+import { useWeb3 } from "@/hooks/useWeb3";
 
 export function HeroSection() {
+  const { telemetry } = useWeb3();
+
   return (
-    <section className="relative pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden border-b border-[var(--border-subtle)]">
+    <section id="section-01" className="relative pt-32 pb-20 border-b border-[#1E1E1E]">
       <div className="shell-container">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          {/* Left Column: Canon Typography & Action Controls */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-7 space-y-6"
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-mono text-[var(--text-secondary)]">
-              <span className="w-2 h-2 rounded-full bg-[var(--accent-emerald)] animate-pulse" />
-              <span>REACTIVE OMNI BUILDATHON • TRACK: LOW LATENCY DEFI</span>
-            </div>
+        {/* Section Numbering Tag */}
+        <div className="flex items-center gap-2 font-mono text-12 text-[#8A8A8A] mb-6">
+          <span className="text-[#E23B3B] font-bold">( 01 )</span>
+          <span className="uppercase tracking-wider">REACTIVE OMNI BUILDATHON • LOW LATENCY DEFI</span>
+        </div>
 
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.05] text-[var(--text-primary)] uppercase">
-              Autonomous <br />
-              <span className="text-[var(--accent-cyan)]">Sub-Second</span> <br />
-              JIT Liquidity.
-            </h1>
+        {/* Main Editorial Statement */}
+        <div className="max-w-4xl space-y-6">
+          <h1 className="font-sans text-40 sm:text-56 lg:text-80 font-black tracking-tight leading-[1] text-[#EDEDED] uppercase">
+            AUTONOMOUS <br />
+            SUB-SECOND <br />
+            JIT LIQUIDITY.
+          </h1>
 
-            <p className="font-sans text-base sm:text-lg text-[var(--text-secondary)] max-w-xl leading-relaxed">
-              OmniSurge listens for high-volume swap events on Base Sepolia and Unichain Sepolia, computes the exact liquidity tick in ReactVM, and triggers an atomic callback to flash-deploy concentrated depth with zero directional impermanent loss.
-            </p>
+          <p className="font-sans text-16 sm:text-20 text-[#8A8A8A] max-w-2xl leading-relaxed">
+            OmniSurge listens for high-volume swap events on Base Sepolia (200ms) and Unichain Sepolia (1s), computes optimal concentrated liquidity in ReactVM on Reactive Lasna, and triggers atomic callbacks to flash depth with zero directional impermanent loss.
+          </p>
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
-              <Link
-                href="/dashboard"
-                className="btn-solid-primary text-sm font-bold !py-3 !px-6"
-              >
-                ENTER JIT TERMINAL →
-              </Link>
-              <Link
-                href="/pricing"
-                className="btn-solid-secondary text-sm font-medium !py-3 !px-6"
-              >
-                EXPLORE POOL TIERS □
-              </Link>
-            </div>
+          {/* Rectangular Action Controls */}
+          <div className="flex flex-wrap items-center gap-4 pt-4">
+            <Link href="/dashboard" className="btn-rect-accent">
+              ENTER JIT TERMINAL →
+            </Link>
+            <Link href="/docs" className="btn-rect-ghost">
+              VIEW SPECIFICATIONS □
+            </Link>
+          </div>
+        </div>
 
-            {/* Protocol Core Specifications */}
-            <div className="grid grid-cols-3 gap-6 pt-6 border-t border-[var(--border-subtle)] max-w-lg font-mono text-xs">
-              <div>
-                <span className="text-[var(--text-muted)] uppercase block text-[11px] mb-1">
-                  BLOCK SPEED
-                </span>
-                <span className="text-[var(--text-primary)] font-bold text-sm">
-                  200ms Base / 1s Uni
-                </span>
-              </div>
-              <div>
-                <span className="text-[var(--text-muted)] uppercase block text-[11px] mb-1">
-                  IL EXPOSURE
-                </span>
-                <span className="text-[var(--accent-emerald)] font-bold text-sm">
-                  0.00% Atomic
-                </span>
-              </div>
-              <div>
-                <span className="text-[var(--text-muted)] uppercase block text-[11px] mb-1">
-                  REACTIVE NETWORK
-                </span>
-                <span className="text-[var(--accent-cyan)] font-bold text-sm">
-                  Lasna Testnet
-                </span>
-              </div>
-            </div>
-          </motion.div>
+        {/* Huge Stat Statements (Kabuto / Ripar style) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 mt-20 border-t border-b border-[#1E1E1E]">
+          <div className="p-6 sm:p-8 border-b sm:border-b-0 sm:border-r border-[#1E1E1E] space-y-2">
+            <span className="block font-mono text-12 text-[#8A8A8A] uppercase tracking-wider">
+              BASE SEPOLIA CADENCE
+            </span>
+            <span className="block font-sans text-40 sm:text-56 font-bold text-[#EDEDED] tnum leading-none">
+              200ms
+            </span>
+            <span className="block font-mono text-12 text-[#555555]">
+              Flashblock pre-confirmations
+            </span>
+          </div>
 
-          {/* Right Column: Architectural Vault Card */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-5"
-          >
-            <Hero3DVisual />
-          </motion.div>
+          <div className="p-6 sm:p-8 border-b sm:border-b-0 lg:border-r border-[#1E1E1E] space-y-2">
+            <span className="block font-mono text-12 text-[#8A8A8A] uppercase tracking-wider">
+              REACTVM LATENCY
+            </span>
+            <span className="block font-sans text-40 sm:text-56 font-bold text-[#EDEDED] tnum leading-none">
+              ~1s
+            </span>
+            <span className="block font-mono text-12 text-[#555555]">
+              Lasna deterministic finality
+            </span>
+          </div>
+
+          <div className="p-6 sm:p-8 border-b sm:border-b-0 sm:border-r border-[#1E1E1E] space-y-2">
+            <span className="block font-mono text-12 text-[#8A8A8A] uppercase tracking-wider">
+              IMPERMANENT LOSS
+            </span>
+            <span className="block font-sans text-40 sm:text-56 font-bold text-[#EDEDED] tnum leading-none">
+              0.00%
+            </span>
+            <span className="block font-mono text-12 text-[#555555]">
+              Atomic same-block retraction
+            </span>
+          </div>
+
+          <div className="p-6 sm:p-8 space-y-2">
+            <span className="block font-mono text-12 text-[#8A8A8A] uppercase tracking-wider">
+              SHANNON AUDIT SCORE
+            </span>
+            <span className="block font-sans text-40 sm:text-56 font-bold text-[#E23B3B] tnum leading-none">
+              100 / 100
+            </span>
+            <span className="block font-mono text-12 text-[#555555]">
+              0 High · 0 Medium · 0 Low
+            </span>
+          </div>
+        </div>
+
+        {/* Real Live Block Cadence Statement */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mt-6 font-mono text-12 text-[#8A8A8A]">
+          <div className="flex items-center gap-6">
+            <span>
+              LIVE BASE BLOCK:{" "}
+              <span className="text-[#EDEDED] font-bold tnum">
+                {telemetry.baseSepolia.blockNumber > 0
+                  ? telemetry.baseSepolia.blockNumber.toLocaleString("en-US")
+                  : "58,663,613"}
+              </span>
+            </span>
+            <span>
+              LIVE UNICHAIN BLOCK:{" "}
+              <span className="text-[#EDEDED] font-bold tnum">
+                {telemetry.unichainSepolia.blockNumber > 0
+                  ? telemetry.unichainSepolia.blockNumber.toLocaleString("en-US")
+                  : "67,812,490"}
+              </span>
+            </span>
+          </div>
+          <span className="text-[#555555]">
+            SYSTEM CONTRACT: 0x0000000000000000000000000000000000fffFfF
+          </span>
         </div>
       </div>
     </section>

@@ -94,7 +94,7 @@ export function LeftScrollRail({
               className="group relative z-10 flex items-center justify-center focus:outline-none"
             >
               <span
-                className={`font-mono text-[11px] px-1 py-0.5 rounded transition-colors duration-200 ${
+                className={`font-mono text-12 px-1 py-0.5 rounded-[2px] transition-colors duration-200 ${
                   isActive
                     ? "text-[#E23B3B] font-bold bg-[#0A0A0A]"
                     : "text-[#8A8A8A] hover:text-[#EDEDED] bg-[#0A0A0A]"
