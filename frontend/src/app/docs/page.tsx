@@ -111,19 +111,19 @@ export function DocsPage() {
             </div>
           </section>
 
-          {/* Section 03: Shannon White-Box Security Assessment */}
+          {/* Section 03: Runtime Safety & Invariant Verification */}
           <section className="space-y-6">
             <div className="flex items-baseline gap-3">
               <span className="font-mono text-16 font-bold text-[#E23B3B]">( 03 )</span>
               <h2 className="font-sans text-20 sm:text-28 font-bold text-[#EDEDED] uppercase">
-                SHANNON WHITE-BOX AUDIT
+                RUNTIME SAFETY & SMART CONTRACT INVARIANTS
               </h2>
             </div>
 
             <div className="border border-[#1E1E1E] p-6 bg-[#0A0A0A] font-mono text-12 space-y-3">
               <div className="flex justify-between items-baseline border-b border-[#1E1E1E] pb-3">
-                <span className="text-[#8A8A8A] uppercase">AUDIT VERIFICATION RESULT</span>
-                <span className="text-[#E23B3B] font-bold text-16">100 / 100 PASSED</span>
+                <span className="text-[#8A8A8A] uppercase">ON-CHAIN INVARIANT STATUS</span>
+                <span className="text-[#EDEDED] font-bold text-16">VERIFIED & ENFORCED</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[#8A8A8A] pt-2">
                 <div>

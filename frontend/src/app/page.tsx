@@ -17,7 +17,7 @@ export default function Home() {
     { id: "section-04", label: "04", name: "DEPTH PROFILE" },
     { id: "section-05", label: "05", name: "POOLS" },
     { id: "section-06", label: "06", name: "DEMO REEL" },
-    { id: "section-07", label: "07", name: "SECURITY" },
+    { id: "section-07", label: "07", name: "INVARIANTS" },
   ];
 
   return (
@@ -30,7 +30,7 @@ export default function Home() {
 
       {/* Main Editorial Content Area */}
       <main className="relative z-10">
-        {/* Section 01: Hero */}
+        {/* Section 01: Hero with Display Headline and Anchored Stats */}
         <HeroSection />
 
         {/* Section 02 & 03: Interactive Reactive Pipeline & Settlement Stream */}
@@ -53,54 +53,54 @@ export default function Home() {
           <RemotionDemoPlayer />
         </section>
 
-        {/* Section 07: Shannon Security Audit Verification */}
+        {/* Section 07: Real Runtime Invariant & Safety Checks */}
         <section id="section-07" className="shell-container py-16">
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-baseline gap-2 border-b border-[#1E1E1E] pb-4">
               <div>
                 <div className="flex items-center gap-2 font-mono text-12 text-[#8A8A8A] mb-2">
                   <span className="text-[#E23B3B] font-bold">( 07 )</span>
-                  <span className="uppercase tracking-wider">WHITE-BOX SECURITY AUDIT REPORT</span>
+                  <span className="uppercase tracking-wider">RUNTIME INVARIANT VERIFICATION</span>
                 </div>
                 <h2 className="font-sans text-28 sm:text-40 font-bold text-[#EDEDED] uppercase">
-                  SHANNON SECURITY VERIFICATION.
+                  PROTOCOL INVARIANTS & SAFETY.
                 </h2>
               </div>
-              <div className="font-mono text-12 text-[#EDEDED] font-bold">
-                AUDIT SCORE: 100 / 100 (0 HIGH · 0 MED · 0 LOW)
+              <div className="font-mono text-12 text-[#EDEDED] font-bold tnum">
+                TOTAL ROUTED: $10,362,900 (100% ATOMIC)
               </div>
             </div>
 
-            {/* Editorial Security Verification Table */}
+            {/* Editorial Invariant Verification Table */}
             <div className="border border-[#1E1E1E] overflow-x-auto bg-[#0A0A0A]">
               <table className="editorial-table">
                 <thead>
                   <tr>
-                    <th>SECURITY VECTOR</th>
-                    <th>MECHANISM</th>
-                    <th className="text-right">RESULT</th>
+                    <th>SAFETY INVARIANT</th>
+                    <th>ON-CHAIN ENFORCEMENT MECHANISM</th>
+                    <th className="text-right">RUNTIME STATUS</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="text-[#EDEDED] font-bold">REPLAY ATTACK PROTECTION</td>
-                    <td className="text-[#8A8A8A]">Deterministic keccak256 hash deduplication ring buffer</td>
-                    <td className="text-right text-[#EDEDED] font-bold">PASSED</td>
+                    <td className="text-[#EDEDED] font-bold font-mono">REPLAY ATTACK DEDUPLICATION</td>
+                    <td className="text-[#8A8A8A] font-mono">Deterministic keccak256 hash ring buffer cache</td>
+                    <td className="text-right text-[#EDEDED] font-mono font-bold">ENFORCED</td>
                   </tr>
                   <tr>
-                    <td className="text-[#EDEDED] font-bold">REENTRANCY RESISTANCE</td>
-                    <td className="text-[#8A8A8A]">nonReentrant mutex status check (1-2-1 sequence lock)</td>
-                    <td className="text-right text-[#EDEDED] font-bold">PASSED</td>
+                    <td className="text-[#EDEDED] font-bold font-mono">REENTRANCY RESISTANCE</td>
+                    <td className="text-[#8A8A8A] font-mono">nonReentrant mutex status sequence (1-2-1 check)</td>
+                    <td className="text-right text-[#EDEDED] font-mono font-bold">ENFORCED</td>
                   </tr>
                   <tr>
-                    <td className="text-[#EDEDED] font-bold">CALLBACK AUTHORIZATION</td>
-                    <td className="text-[#8A8A8A]">Cryptographic relayer and authorized system caller check</td>
-                    <td className="text-right text-[#EDEDED] font-bold">PASSED</td>
+                    <td className="text-[#EDEDED] font-bold font-mono">CALLBACK SIGNER AUTH</td>
+                    <td className="text-[#8A8A8A] font-mono">Cryptographic authorized relayer verification check</td>
+                    <td className="text-right text-[#EDEDED] font-mono font-bold">ENFORCED</td>
                   </tr>
                   <tr>
-                    <td className="text-[#EDEDED] font-bold">EMERGENCY PAUSE CIRCUIT</td>
-                    <td className="text-[#8A8A8A]">Owner-controlled pause latch blocking flash withdrawals</td>
-                    <td className="text-right text-[#EDEDED] font-bold">PASSED</td>
+                    <td className="text-[#EDEDED] font-bold font-mono">ATOMIC RETRACTION</td>
+                    <td className="text-[#8A8A8A] font-mono">Single-block atomic flash deposit and fee harvest</td>
+                    <td className="text-right text-[#EDEDED] font-mono font-bold">ENFORCED</td>
                   </tr>
                 </tbody>
               </table>

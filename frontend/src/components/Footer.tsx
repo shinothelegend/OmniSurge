@@ -25,7 +25,7 @@ export function Footer() {
     { label: "BASE SEPOLIA EXPLORER", href: "https://sepolia.basescan.org" },
     { label: "UNICHAIN SEPOLIA EXPLORER", href: "https://sepolia.uniscan.xyz" },
     { label: "REACTIVE LASNA EXPLORER", href: "https://lasna.reactscan.net" },
-    { label: "SHANNON AUDIT (100/100)", href: "#audit" },
+    { label: "GITHUB REPOSITORY", href: "https://github.com/shinothelegend/OmniSurge" },
   ];
 
   return (

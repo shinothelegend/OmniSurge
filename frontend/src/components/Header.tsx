@@ -37,11 +37,10 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`font-mono text-12 transition-colors flex items-center gap-1.5 ${
-                  isActive
+                className={`font-mono text-12 transition-colors flex items-center gap-1.5 ${isActive
                     ? "text-[#EDEDED] font-bold"
                     : "text-[#8A8A8A] hover:text-[#EDEDED]"
-                }`}
+                  }`}
               >
                 <span className={isActive ? "text-[#E23B3B]" : "text-[#555555]"}>
                   ({item.num})

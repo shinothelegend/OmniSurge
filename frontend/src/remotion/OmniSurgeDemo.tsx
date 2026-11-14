@@ -278,9 +278,9 @@ export const OmniSurgeDemo: React.FC = () => {
             </div>
           </div>
           <div>
-            <div style={{ fontSize: "12px", color: "#64748b", fontFamily: "monospace" }}>SHANNON AUDIT</div>
-            <div style={{ fontSize: "24px", fontWeight: "bold", color: "#a855f7", fontFamily: "monospace" }}>
-              100/100 PASSED
+            <div style={{ fontSize: "12px", color: "#64748b", fontFamily: "monospace" }}>POOLS MONITORED</div>
+            <div style={{ fontSize: "24px", fontWeight: "bold", color: "#EDEDED", fontFamily: "monospace" }}>
+              4 ACTIVE
             </div>
           </div>
         </div>
