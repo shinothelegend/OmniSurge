@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing and coverage
+coverage/
+.nyc_output
+
+# Production builds
+dist/
+build/
+.next/
+out/
+
+# Hardhat
+cache/
+artifacts/
+typechain/
+typechain-types/
+
+# Misc
+.DS_Store
+*.pem
+*.log
+.env
+.env*.local
+
+# Chrome DevTools / Screenshots
+public/dashboard-live.png
+
