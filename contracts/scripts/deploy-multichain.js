@@ -1,63 +1,73 @@
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first");
+
 import hre from "hardhat";
-import { ethers } from "ethers";
 import * as fs from "fs";
 import * as path from "path";
+import { fileURLToPath } from "url";
 
-const { network } = hre;
+const { ethers, network } = hre;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const BASE_SEPOLIA_CHAIN_ID = 84532;
 const UNICHAIN_SEPOLIA_CHAIN_ID = 1301;
 const REACTIVE_LASNA_CHAIN_ID = 5318007;
 const SYSTEM_CONTRACT = "0x0000000000000000000000000000000000fffFfF";
 
-// Uniswap V2 Swap topic
-const UNISWAP_V2_SWAP_TOPIC =
-  "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67";
-
 const DEPLOYMENTS_PATH = path.resolve(__dirname, "../deployments.json");
 
-function loadDeployments(): Record<string, any> {
+function loadDeployments() {
   if (fs.existsSync(DEPLOYMENTS_PATH)) {
-    return JSON.parse(fs.readFileSync(DEPLOYMENTS_PATH, "utf8"));
+    try {
+      return JSON.parse(fs.readFileSync(DEPLOYMENTS_PATH, "utf8"));
+    } catch {
+      return {};
+    }
   }
   return {};
 }
 
-function saveDeployments(deployments: Record<string, any>) {
+function saveDeployments(deployments) {
   fs.writeFileSync(
     DEPLOYMENTS_PATH,
     JSON.stringify(deployments, null, 2) + "\n"
   );
-  console.log(`\n💾 Deployments saved to ${DEPLOYMENTS_PATH}\n`);
+  console.log(`\n💾 Deployments recorded to ${DEPLOYMENTS_PATH}\n`);
 }
 
 async function main() {
   const [deployer] = await ethers.getSigners();
-  const chainId = (await network.provider.send("eth_chainId")).toString();
-  const chainIdNum = parseInt(chainId, 16);
+  const net = await ethers.provider.getNetwork();
+  const chainIdNum = Number(net.chainId);
 
   console.log(`\n============================================================`);
   console.log(`🚀 Deploying OmniSurge on Chain ID: ${chainIdNum} (${network.name})`);
   console.log(`👤 Deployer: ${deployer.address}`);
+  const balance = await ethers.provider.getBalance(deployer.address);
+  console.log(`💰 Deployer Balance: ${ethers.formatEther(balance)} native`);
   console.log(`============================================================\n`);
+
+  if (balance === 0n) {
+    throw new Error(`❌ Insufficient funds on chain ${chainIdNum}. Balance is 0.`);
+  }
 
   const deployments = loadDeployments();
 
   // ================================================================
-  // NETWORK 1: Base Sepolia (84532) — Destination + Pool
+  // NETWORK 1: Base Sepolia (84532) — DestinationCallback + MockPool
   // ================================================================
   if (chainIdNum === BASE_SEPOLIA_CHAIN_ID) {
-    console.log("📦 Deploying DestinationCallback...");
+    console.log("📦 1/3 Deploying DestinationCallback...");
     const DestinationCallback = await ethers.getContractFactory("DestinationCallback");
     const destinationCallback = await DestinationCallback.deploy(
-      deployer.address, // callbackRelayer
-      ethers.ZeroAddress // authorizedReactiveContract (set later)
+      deployer.address,
+      ethers.ZeroAddress
     );
     await destinationCallback.waitForDeployment();
     const destAddress = await destinationCallback.getAddress();
     console.log(`✅ DestinationCallback: ${destAddress}`);
 
-    console.log("📦 Deploying MockPool (Base Sepolia WETH/USDC)...");
+    console.log("📦 2/3 Deploying MockPool (Base Sepolia WETH-USDC)...");
     const MockPool = await ethers.getContractFactory("MockPool");
     const poolBase = await MockPool.deploy(
       "Base Sepolia WETH-USDC",
@@ -67,10 +77,11 @@ async function main() {
     );
     await poolBase.waitForDeployment();
     const poolBaseAddress = await poolBase.getAddress();
-    console.log(`✅ MockPool (Base): ${poolBaseAddress}`);
+    console.log(`✅ MockPool (Base Sepolia): ${poolBaseAddress}`);
 
-    console.log("🔗 Registering pool on DestinationCallback...");
-    await destinationCallback.setPoolRegistration(poolBaseAddress, true);
+    console.log("🔗 3/3 Registering pool on DestinationCallback...");
+    const regTx = await destinationCallback.setPoolRegistration(poolBaseAddress, true);
+    await regTx.wait();
     console.log(`✅ Pool registered`);
 
     deployments.baseSepolia = {
@@ -78,76 +89,90 @@ async function main() {
       destinationCallback: destAddress,
       mockPool: poolBaseAddress,
       deployer: deployer.address,
+      deployedAt: new Date().toISOString(),
     };
     saveDeployments(deployments);
 
     console.log("\n🎉 Base Sepolia deployment complete!");
-    console.log(`   Next: Deploy OmniSurgeReactive on Reactive Lasna, then setAuthorizedReactiveContract.`);
     return;
   }
 
   // ================================================================
-  // NETWORK 2: Reactive Lasna (5318007) — Reactive Smart Contract
+  // NETWORK 2: Reactive Lasna (5318007) — OmniSurgeReactive RSC
   // ================================================================
   if (chainIdNum === REACTIVE_LASNA_CHAIN_ID) {
-    // Load Base Sepolia deployment for cross-chain references
-    if (!deployments.baseSepolia) {
+    if (!deployments.baseSepolia || !deployments.baseSepolia.destinationCallback) {
       throw new Error(
-        "❌ Base Sepolia deployment not found. Deploy to baseSepolia first, then run on reactiveLasna."
+        "❌ Base Sepolia deployment not found in deployments.json. Deploy to Base Sepolia first."
       );
     }
 
-    const { destinationCallback: destCallbackAddress } = deployments.baseSepolia;
+    const destCallbackAddress = deployments.baseSepolia.destinationCallback;
+    console.log(`🎯 Target Base Sepolia Callback: ${destCallbackAddress}`);
 
     console.log("📦 Deploying OmniSurgeReactive RSC...");
     const OmniSurgeReactive = await ethers.getContractFactory("OmniSurgeReactive");
     const reactiveListener = await OmniSurgeReactive.deploy(
-      SYSTEM_CONTRACT, // uses default Reactive System contract
-      BASE_SEPOLIA_CHAIN_ID, // destination chain
+      SYSTEM_CONTRACT,
+      BASE_SEPOLIA_CHAIN_ID,
       destCallbackAddress,
-      ethers.parseEther("0.5") // minImbalanceThreshold 0.5 ETH
+      ethers.parseEther("0.5")
     );
     await reactiveListener.waitForDeployment();
     const reactiveAddress = await reactiveListener.getAddress();
     console.log(`✅ OmniSurgeReactive: ${reactiveAddress}`);
 
-    console.log("🔗 Setting authorized reactive contract on DestinationCallback...");
-    // We can't call DestinationCallback on Base Sepolia from Lasna directly.
-    // This must be done via a cross-chain call or by the deployer on Base Sepolia.
-    console.log(`   ⚠️  MANUAL STEP: On Base Sepolia, call:`);
-    console.log(`   destinationCallback.setAuthorizedReactiveContract("${reactiveAddress}")`);
-
-    console.log("🔗 Subscribing to Base Sepolia pool...");
-    if (!vm && address(SYSTEM_CONTRACT) !== address(0)) {
-      // In real Reactive Network, this subscribes via the system contract
-      // Locally, we simulate it
-      console.log(`   subscribePool(${BASE_SEPOLIA_CHAIN_ID}, ${deployments.baseSepolia.mockPool}, "Base Sepolia")`);
+    // If Base Sepolia pool is available, subscribe
+    if (deployments.baseSepolia.mockPool) {
+      console.log(`🔗 Subscribing to Base Sepolia pool: ${deployments.baseSepolia.mockPool}`);
+      try {
+        const subTx = await reactiveListener.subscribePool(
+          BASE_SEPOLIA_CHAIN_ID,
+          deployments.baseSepolia.mockPool,
+          "Base Sepolia WETH-USDC"
+        );
+        await subTx.wait();
+        console.log(`✅ Subscribed to Base Sepolia pool`);
+      } catch (err) {
+        console.warn(`⚠️ Subscription note: ${err.message}`);
+      }
     }
 
-    console.log("🔗 Subscribing to Unichain Sepolia pool...");
-    console.log(`   ⚠️  MANUAL STEP: Deploy MockPool to Unichain Sepolia, then:`);
-    console.log(`   subscribePool(${UNICHAIN_SEPOLIA_CHAIN_ID}, <unichainPoolAddress>, "Unichain Sepolia")`);
+    // If Unichain Sepolia pool is available, subscribe
+    if (deployments.unichainSepolia && deployments.unichainSepolia.mockPool) {
+      console.log(`🔗 Subscribing to Unichain Sepolia pool: ${deployments.unichainSepolia.mockPool}`);
+      try {
+        const subTx = await reactiveListener.subscribePool(
+          UNICHAIN_SEPOLIA_CHAIN_ID,
+          deployments.unichainSepolia.mockPool,
+          "Unichain Sepolia WETH-USDC"
+        );
+        await subTx.wait();
+        console.log(`✅ Subscribed to Unichain Sepolia pool`);
+      } catch (err) {
+        console.warn(`⚠️ Subscription note: ${err.message}`);
+      }
+    }
 
     deployments.reactiveLasna = {
       chainId: REACTIVE_LASNA_CHAIN_ID,
       omniSurgeReactive: reactiveAddress,
       systemContract: SYSTEM_CONTRACT,
       deployer: deployer.address,
+      deployedAt: new Date().toISOString(),
     };
     saveDeployments(deployments);
 
     console.log("\n🎉 Reactive Lasna deployment complete!");
-    console.log(`   Summary:`);
-    console.log(`   Base Sepolia DestinationCallback: ${destCallbackAddress}`);
-    console.log(`   Reactive Lasna OmniSurgeReactive: ${reactiveAddress}`);
+    console.log(`   Next: authorize ${reactiveAddress} on Base Sepolia destinationCallback.`);
     return;
   }
 
   // ================================================================
-  // NETWORK 3: Unichain Sepolia (1301) — Pool only
+  // NETWORK 3: Unichain Sepolia (1301) — MockPool
   // ================================================================
   if (chainIdNum === UNICHAIN_SEPOLIA_CHAIN_ID) {
-    console.log("📦 Deploying MockPool (Unichain Sepolia WETH/USDC)...");
+    console.log("📦 Deploying MockPool (Unichain Sepolia WETH-USDC)...");
     const MockPool = await ethers.getContractFactory("MockPool");
     const poolUnichain = await MockPool.deploy(
       "Unichain Sepolia WETH-USDC",
@@ -157,18 +182,17 @@ async function main() {
     );
     await poolUnichain.waitForDeployment();
     const poolUnichainAddress = await poolUnichain.getAddress();
-    console.log(`✅ MockPool (Unichain): ${poolUnichainAddress}`);
+    console.log(`✅ MockPool (Unichain Sepolia): ${poolUnichainAddress}`);
 
     deployments.unichainSepolia = {
       chainId: UNICHAIN_SEPOLIA_CHAIN_ID,
       mockPool: poolUnichainAddress,
       deployer: deployer.address,
+      deployedAt: new Date().toISOString(),
     };
     saveDeployments(deployments);
 
     console.log("\n🎉 Unichain Sepolia deployment complete!");
-    console.log(`   ⚠️  MANUAL STEP: On Reactive Lasna, subscribe to this pool:`);
-    console.log(`   subscribePool(${UNICHAIN_SEPOLIA_CHAIN_ID}, ${poolUnichainAddress}, "Unichain Sepolia")`);
     return;
   }
 

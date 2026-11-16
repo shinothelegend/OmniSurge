@@ -1,3 +1,6 @@
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first");
+
 import "@nomicfoundation/hardhat-toolbox";
 import dotenv from "dotenv";
 

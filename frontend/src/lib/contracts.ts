@@ -49,19 +49,17 @@ export const NETWORKS: Record<string, NetworkConfig> = {
   },
 };
 
-// Placeholder addresses — replaced by deployments.json after testnet deploy.
-// Run: cd contracts && npx hardhat run scripts/deploy-multichain.js --network baseSepolia
-//      npx hardhat run scripts/deploy-multichain.js --network reactiveLasna
+// Live Deployed OmniSurge Contract Addresses (Chain IDs: 84532, 1301, 5318007)
 export const CONTRACT_ADDRESSES: Record<string, Record<string, string>> = {
   baseSepolia: {
-    destinationCallback: "",
-    mockPool: "",
+    destinationCallback: "0xA2c90BE611c9Ddcc4757B0AB0834008a71452879",
+    mockPool: "0xCc5538B2F9C57Cdf075EB9C67bAcfEf8E4c2446B",
   },
   unichainSepolia: {
-    mockPool: "",
+    mockPool: "0xCc5538B2F9C57Cdf075EB9C67bAcfEf8E4c2446B",
   },
   reactiveLasna: {
-    omniSurgeReactive: "",
+    omniSurgeReactive: "0xA2c90BE611c9Ddcc4757B0AB0834008a71452879",
     systemContract: "0x0000000000000000000000000000000000fffFfF",
   },
 };

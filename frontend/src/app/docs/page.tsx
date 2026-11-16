@@ -83,27 +83,57 @@ export function DocsPage() {
 
             <div className="border border-[#1E1E1E] divide-y divide-[#1E1E1E] bg-[#0A0A0A]">
               <div className="p-6 space-y-2">
-                <span className="font-mono text-14 font-bold text-[#EDEDED] uppercase block">
-                  OmniSurgeReactive.sol (RSC)
-                </span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span className="font-mono text-14 font-bold text-[#EDEDED] uppercase block">
+                    OmniSurgeReactive.sol (RSC)
+                  </span>
+                  <a
+                    href="https://lasna.reactscan.net/address/0xA2c90BE611c9Ddcc4757B0AB0834008a71452879"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-mono text-12 text-[#E23B3B] hover:underline"
+                  >
+                    0xA2c9...2879 (REACTSCAN ↗)
+                  </a>
+                </div>
                 <p className="font-sans text-14 text-[#8A8A8A] leading-relaxed">
                   Deployed on Reactive Lasna (Chain ID 5318007). Subscribes to Uniswap swap topics (0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67), filters volume against the minimum imbalance threshold, pre-computes 150% concentrated liquidity coverage, and dispatches callbacks.
                 </p>
               </div>
 
               <div className="p-6 space-y-2">
-                <span className="font-mono text-14 font-bold text-[#EDEDED] uppercase block">
-                  DestinationCallback.sol
-                </span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span className="font-mono text-14 font-bold text-[#EDEDED] uppercase block">
+                    DestinationCallback.sol
+                  </span>
+                  <a
+                    href="https://sepolia.basescan.org/address/0xA2c90BE611c9Ddcc4757B0AB0834008a71452879"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-mono text-12 text-[#E23B3B] hover:underline"
+                  >
+                    0xA2c9...2879 (BASESCAN ↗)
+                  </a>
+                </div>
                 <p className="font-sans text-14 text-[#8A8A8A] leading-relaxed">
                   Deployed on Base Sepolia and Unichain Sepolia. Validates authorized relayer signatures, enforces deterministic keccak256 hash deduplication to eliminate replay attacks, guards mutations with a nonReentrant mutex, and executes atomic flash liquidity injections.
                 </p>
               </div>
 
               <div className="p-6 space-y-2">
-                <span className="font-mono text-14 font-bold text-[#EDEDED] uppercase block">
-                  MockPool.sol
-                </span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span className="font-mono text-14 font-bold text-[#EDEDED] uppercase block">
+                    MockPool.sol (Base Sepolia WETH-USDC)
+                  </span>
+                  <a
+                    href="https://sepolia.basescan.org/address/0xCc5538B2F9C57Cdf075EB9C67bAcfEf8E4c2446B"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-mono text-12 text-[#E23B3B] hover:underline"
+                  >
+                    0xCc55...2446B (BASESCAN ↗)
+                  </a>
+                </div>
                 <p className="font-sans text-14 text-[#8A8A8A] leading-relaxed">
                   Concentrated liquidity DEX emulator with tick reserves, volume-driven slippage calculation, and single-block atomic JIT deposit-withdraw flash loops.
                 </p>

@@ -1,0 +1,16 @@
+{
+  "baseSepolia": {
+    "chainId": 84532,
+    "destinationCallback": "0xA2c90BE611c9Ddcc4757B0AB0834008a71452879",
+    "mockPool": "0xCc5538B2F9C57Cdf075EB9C67bAcfEf8E4c2446B",
+    "deployer": "0x72D6A30f2B72d9D8bfB19241bCE6839E1BACa63B",
+    "deployedAt": "2026-11-16T16:27:25.248Z"
+  },
+  "reactiveLasna": {
+    "chainId": 5318007,
+    "omniSurgeReactive": "0xA2c90BE611c9Ddcc4757B0AB0834008a71452879",
+    "systemContract": "0x0000000000000000000000000000000000fffFfF",
+    "deployer": "0x72D6A30f2B72d9D8bfB19241bCE6839E1BACa63B",
+    "deployedAt": "2026-11-16T16:28:46.295Z"
+  }
+}
