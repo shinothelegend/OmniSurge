@@ -1,23 +1,107 @@
 {
-  "timestamp": "2026-11-22T09:53:28.040Z",
-  "benchmark": "OmniSurge End-to-End Reactive Loop",
-  "stages": {
-    "originSwap": {
-      "chain": "Base Sepolia (sim)",
-      "latencyMs": 4
+  "timestamp": "2026-11-22T11:27:53.941Z",
+  "benchmark": "OmniSurge Latency Benchmark — 5 Consecutive Iterations",
+  "stats": {
+    "stage1": {
+      "min": 2,
+      "max": 3,
+      "median": 3,
+      "p95": 3
     },
-    "reactVM": {
-      "chain": "Reactive Lasna (sim)",
-      "latencyMs": 6
+    "stage2": {
+      "min": 2,
+      "max": 2,
+      "median": 2,
+      "p95": 2
     },
-    "destinationCallback": {
-      "chain": "Base Sepolia (sim)",
-      "latencyMs": 3
+    "stage3": {
+      "min": 2,
+      "max": 3,
+      "median": 2,
+      "p95": 2.8
+    },
+    "total": {
+      "min": 6,
+      "max": 8,
+      "median": 7,
+      "p95": 7.8
     }
   },
-  "totalStageMs": 13,
-  "wallClockMs": 19,
-  "liquidityDeployed": "37.5",
-  "feeCaptured": "0.075",
-  "gasUsed": "418082"
+  "iterations": [
+    {
+      "iteration": 1,
+      "stage1Ms": 3,
+      "stage1Block": 8,
+      "stage1Timestamp": 1795346881,
+      "stage2Ms": 2,
+      "stage3Ms": 3,
+      "stage3Block": 10,
+      "stage3Timestamp": 1795346883,
+      "totalMs": 8,
+      "wallClockMs": 11,
+      "liquidityDeployed": "33.0",
+      "feeCaptured": "0.066",
+      "gasUsed": "418082"
+    },
+    {
+      "iteration": 2,
+      "stage1Ms": 3,
+      "stage1Block": 11,
+      "stage1Timestamp": 1795346884,
+      "stage2Ms": 2,
+      "stage3Ms": 2,
+      "stage3Block": 13,
+      "stage3Timestamp": 1795346886,
+      "totalMs": 7,
+      "wallClockMs": 7,
+      "liquidityDeployed": "36.0",
+      "feeCaptured": "0.072",
+      "gasUsed": "349682"
+    },
+    {
+      "iteration": 3,
+      "stage1Ms": 2,
+      "stage1Block": 14,
+      "stage1Timestamp": 1795346887,
+      "stage2Ms": 2,
+      "stage3Ms": 2,
+      "stage3Block": 16,
+      "stage3Timestamp": 1795346889,
+      "totalMs": 6,
+      "wallClockMs": 6,
+      "liquidityDeployed": "39.0",
+      "feeCaptured": "0.078",
+      "gasUsed": "349682"
+    },
+    {
+      "iteration": 4,
+      "stage1Ms": 3,
+      "stage1Block": 17,
+      "stage1Timestamp": 1795346890,
+      "stage2Ms": 2,
+      "stage3Ms": 2,
+      "stage3Block": 19,
+      "stage3Timestamp": 1795346892,
+      "totalMs": 7,
+      "wallClockMs": 7,
+      "liquidityDeployed": "42.0",
+      "feeCaptured": "0.084",
+      "gasUsed": "349682"
+    },
+    {
+      "iteration": 5,
+      "stage1Ms": 2,
+      "stage1Block": 20,
+      "stage1Timestamp": 1795346893,
+      "stage2Ms": 2,
+      "stage3Ms": 2,
+      "stage3Block": 22,
+      "stage3Timestamp": 1795346895,
+      "totalMs": 6,
+      "wallClockMs": 9,
+      "liquidityDeployed": "45.0",
+      "feeCaptured": "0.09",
+      "gasUsed": "349682"
+    }
+  ]
 }

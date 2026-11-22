@@ -6,7 +6,7 @@ import { Footer } from "@/components/Footer";
 
 export function SettingsView() {
   const [oracleAddress, setOracleAddress] = useState(
-    "0x0000000000000000000000000000000000fffFfF"
+    "0x8888888888888888888888888888888888888888"
   );
   const [gasLimit, setGasLimit] = useState("850000");
   const [slippage, setSlippage] = useState("0.15");

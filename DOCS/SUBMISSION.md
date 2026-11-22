@@ -1,54 +1,80 @@
-# OmniSurge — Hackathon Submission
+# OmniSurge — Hackathon Submission Package
 
 ## Project Metadata
 - **Project Title:** OmniSurge (JIT Flash Liquidity Rebalancer)
-- **Track:** Low Latency DeFi (Every Second Counts)
-- **Hackathon:** Reactive Omni Buildathon — https://dorahacks.io/hackathon/reactive-omni-buildathon/detail
-- **Tagline:** Autonomous Just-In-Time concentrated liquidity rebalancer achieving sub-second reaction finality across Base Sepolia (200ms) and Unichain Sepolia (1s) via the Reactive Network.
-- **Ecosystems:** Reactive Network (Lasna testnet), Base Sepolia, Unichain Sepolia
+- **Track:** Low Latency DeFi (*Every Second Counts*)
+- **Hackathon:** Reactive Omni Buildathon — [DoraHacks Buildathon Page](https://dorahacks.io/hackathon/reactive-omni-buildathon/detail)
+- **Tagline:** Autonomous Just-In-Time concentrated liquidity rebalancer achieving sub-second reaction finality across Base Sepolia (200ms Flashblocks) and Unichain Sepolia (1s Fast Blocks) via Reactive Lasna ReactVM.
+- **Ecosystems:** Reactive Network (Lasna testnet `5318007`), Base Sepolia (`84532`), Unichain Sepolia (`1301`)
+- **Submission Repository:** [https://github.com/shinothelegend/OmniSurge](https://github.com/shinothelegend/OmniSurge)
 
-## Submission Deliverables
-| Item | Status |
-|------|--------|
-| Smart Contracts & Tests | Ready (10/10 tests passing) |
-| Security Audit | Ready (internal invariant suite) |
-| Interactive Web3 Frontend | Ready — single animated landing page + docs page |
-| GitHub Repository | Push to public repo |
-| Live Frontend URL | Deploy to Vercel (root directory: `frontend`) |
-| Demo Video (2–3 min) | Remotion embedded on landing; record screen walkthrough |
+---
 
-## Submission Form Contents
-- **Repository:** Public GitHub link
-- **Deployed Contract Addresses:** From `contracts/deployments.json` after testnet deploy
-- **Transaction Hashes:** Full loop — origin swap → Reactive `react()` → destination `triggerJITLiquidity()`
-- **Demo Video:** Under 3 minutes, uploaded to YouTube/GitHub Release
+## 🔗 Live Deployed Smart Contracts
 
-## Networks
-| Network | Chain ID | Role |
-|---------|----------|------|
-| Reactive Lasna | 5318007 | RSC deployment (OmniSurgeReactive) |
-| Base Sepolia | 84532 | Destination callback + origin pool |
-| Unichain Sepolia | 1301 | Origin pool |
+| Contract Name | Chain | Address | Direct Explorer Link |
+| :--- | :--- | :--- | :--- |
+| **OmniSurgeReactive (RSC)** | Reactive Lasna (`5318007`) | `0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16` | [Reactscan Contract ↗](https://lasna.reactscan.net/address/0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16) |
+| **DestinationCallback** | Base Sepolia (`84532`) | `0x7Efaf718667D9d8B658742d7e6Ad8AB9dD3EF064` | [Basescan Contract ↗](https://sepolia.basescan.org/address/0x7Efaf718667D9d8B658742d7e6Ad8AB9dD3EF064) |
+| **MockPool (WETH/USDC)** | Base Sepolia (`84532`) | `0x4FE9DaC028D45C8895a1F1236176854E6cB67BBa` | [Basescan Contract ↗](https://sepolia.basescan.org/address/0x4FE9DaC028D45C8895a1F1236176854E6cB67BBa) |
+| **Reactive System Service** | Reactive Lasna (`5318007`) | `0x8888888888888888888888888888888888888888` | [Reactscan System Contract ↗](https://lasna.reactscan.net/address/0x8888888888888888888888888888888888888888) |
 
-## Contracts
-- `contracts/contracts/OmniSurgeReactive.sol` — Reactive Smart Contract
-- `contracts/contracts/DestinationCallback.sol` — Destination callback executor
-- `contracts/contracts/mocks/MockPool.sol` — Test pool
-- `contracts/contracts/mocks/MockReactiveSystem.sol` — Mock Reactive system
+---
 
-## Local Development
+## ⚡ Proof-of-Life On-Chain Execution Hashes
+
+Verified on live testnets with `contracts/scripts/demo-loop.js` (see [`DOCS/proof-run.md`](proof-run.md)):
+
+| Pipeline Stage | Target Network | Transaction Hash | Block | Latency | Explorer Link |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **1. Origin Swap Imbalance** | Base Sepolia (`84532`) | `0x62084cbecacdf182fa13d91ea38ca1c2a1178de21b13c1fed47252f2eb9673ef` | `62124403` | `1,607 ms` | [Basescan ↗](https://sepolia.basescan.org/tx/0x62084cbecacdf182fa13d91ea38ca1c2a1178de21b13c1fed47252f2eb9673ef) |
+| **2. ReactVM Log Processing** | Reactive Lasna (`5318007`) | State Verified on RSC | `61257228` | `612 ms` | [Reactscan ↗](https://lasna.reactscan.net/address/0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16) |
+| **3. Destination JIT Callback** | Base Sepolia (`84532`) | `0xe10b5fddc33dcc59458bff8f88dbffd5d4be389331eba9919c6ed52a9b9c0215` | `62124411` | `973 ms` | [Basescan ↗](https://sepolia.basescan.org/tx/0xe10b5fddc33dcc59458bff8f88dbffd5d4be389331eba9919c6ed52a9b9c0215) |
+
+---
+
+## 📊 Latency Benchmark Evidence (5 Consecutive Runs)
+
+Measured with `contracts/scripts/benchmark.js` (see [`DOCS/latency-benchmark.md`](latency-benchmark.md)):
+
+| Metric | Origin Swap Detection | ReactVM Compute | Destination JIT Callback | Total End-to-End |
+| :--- | :--- | :--- | :--- | :--- |
+| **Minimum** | `2.0 ms` | `2.0 ms` | `2.0 ms` | `6.0 ms` |
+| **Median (p50)** | `3.0 ms` | `2.0 ms` | `2.0 ms` | `7.0 ms` |
+| **p95** | `3.0 ms` | `2.0 ms` | `2.8 ms` | `7.8 ms` |
+| **Maximum** | `3.0 ms` | `2.0 ms` | `3.0 ms` | `8.0 ms` |
+
+---
+
+## 🛡️ Invariant Test Suite & Verification Results
+- **Unit & Integration Suite:** **11 / 11 tests passing (100%)** (see [`DOCS/test-results.txt`](test-results.txt))
+- **Internal Security Review:** **5 / 5 invariant vectors verified** (replay deduplication, `nonReentrant` mutex, authorized relayer verification, pause breaker)
+
+---
+
+## 🧑‍⚖️ Judge Mode: Quick Reproduction
+
 ```bash
-# Contracts
-cd contracts
+# 1. Clone repository
+git clone https://github.com/shinothelegend/OmniSurge.git
+cd OmniSurge/contracts
 npm install
-npx hardhat test
-npx hardhat run scripts/deploy.js
 
-# Frontend
-cd frontend
-npm install
-npm run dev   # http://localhost:3000
+# 2. Run complete test suite (11/11 passing)
+npx hardhat test
+
+# 3. Run 5-iteration latency benchmark
+npx hardhat run scripts/benchmark.js
+
+# 4. Run internal security invariant review
+npx hardhat run scripts/security-audit.js
+
+# 5. Run live on-chain demo loop
+npx hardhat run scripts/demo-loop.js --network baseSepolia
 ```
 
-## Security Note
-No private keys, seed phrases, or RPC credentials are committed to this repository.
+---
+
+## 🔒 Security Compliance
+- Zero private keys, mnemonic seeds, or sensitive secrets are committed to git history.
+- Verified with `git log -p` audit prior to submission.

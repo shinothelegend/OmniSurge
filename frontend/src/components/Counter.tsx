@@ -10,7 +10,6 @@ interface CounterProps {
   prefix?: string;
   suffix?: string;
   decimals?: number;
-  badge?: string;
 }
 
 export function Counter({
@@ -20,7 +19,6 @@ export function Counter({
   prefix = "",
   suffix = "",
   decimals = 0,
-  badge = "% UP",
 }: CounterProps) {
   const [val, setVal] = useState(from);
   const ref = useRef<HTMLDivElement>(null);
@@ -58,11 +56,6 @@ export function Counter({
         {val.toFixed(decimals)}
         {suffix}
       </span>
-      {badge && (
-        <span className="font-mono text-[11px] font-bold tracking-[0.1em] text-[#E0342B] border border-[#E0342B]/30 px-1.5 py-0.5 rounded-[2px]">
-          {badge}
-        </span>
-      )}
     </div>
   );
 }

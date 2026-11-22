@@ -175,6 +175,84 @@ export function DocsPage() {
               </div>
             </div>
           </section>
+
+          {/* Section 04: Judge Reproduction & Verification Guide */}
+          <section className="space-y-6">
+            <div className="flex items-baseline gap-3">
+              <span className="font-mono text-16 font-bold text-[#E23B3B]">( 04 )</span>
+              <h2 className="font-sans text-20 sm:text-28 font-bold text-[#EDEDED] uppercase">
+                JUDGE MODE • HOW TO REPRODUCE & VERIFY
+              </h2>
+            </div>
+
+            <div className="border border-[#1E1E1E] p-6 sm:p-8 bg-[#0A0A0A] space-y-6">
+              <p className="font-sans text-14 text-[#8A8A8A] leading-relaxed">
+                OmniSurge is deployed and active on live testnets. Judges can reproduce the entire end-to-end reactive cycle locally or on-chain with the commands below:
+              </p>
+
+              {/* Steps */}
+              <div className="space-y-4 font-mono text-12">
+                <div className="p-4 border border-[#1E1E1E] bg-[#111111] space-y-2">
+                  <span className="text-[#EDEDED] font-bold block">1. RUN COMPLETE UNIT & INVARIANT TEST SUITE (11/11 PASSING)</span>
+                  <div className="text-[#E23B3B] bg-[#0A0A0A] p-2 border border-[#1E1E1E]">
+                    cd contracts && npx hardhat test
+                  </div>
+                  <span className="text-[#8A8A8A] block">
+                    Executes all 11 invariant, reactive callback, replay protection, and latency estimation tests.
+                  </span>
+                </div>
+
+                <div className="p-4 border border-[#1E1E1E] bg-[#111111] space-y-2">
+                  <span className="text-[#EDEDED] font-bold block">2. RUN 5-ITERATION STATISTICAL LATENCY BENCHMARK</span>
+                  <div className="text-[#E23B3B] bg-[#0A0A0A] p-2 border border-[#1E1E1E]">
+                    cd contracts && npx hardhat run scripts/benchmark.js
+                  </div>
+                  <span className="text-[#8A8A8A] block">
+                    Measures Origin Swap, ReactVM compute, and Destination Callback across 5 runs, outputting p50/p95 metrics.
+                  </span>
+                </div>
+
+                <div className="p-4 border border-[#1E1E1E] bg-[#111111] space-y-2">
+                  <span className="text-[#EDEDED] font-bold block">3. LIVE ON-CHAIN PROOF-OF-LIFE DEMO LOOP</span>
+                  <div className="text-[#E23B3B] bg-[#0A0A0A] p-2 border border-[#1E1E1E]">
+                    cd contracts && npx hardhat run scripts/demo-loop.js --network baseSepolia
+                  </div>
+                  <span className="text-[#8A8A8A] block">
+                    Submits a live swap to Base Sepolia MockPool, verifies Lasna ReactVM state, triggers atomic JIT callback, and generates DOCS/proof-run.md.
+                  </span>
+                </div>
+              </div>
+
+              {/* Live Contract Reference Grid */}
+              <div className="border-t border-[#1E1E1E] pt-4 font-mono text-12 space-y-2">
+                <span className="text-[#EDEDED] font-bold block uppercase">VERIFIED LIVE TESTNET DEPLOYMENTS:</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[#8A8A8A]">
+                  <div>
+                    <span className="text-[#EDEDED] block">BASE SEPOLIA CALLBACK:</span>
+                    <a
+                      href="https://sepolia.basescan.org/address/0x7Efaf718667D9d8B658742d7e6Ad8AB9dD3EF064"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[#E23B3B] hover:underline break-all"
+                    >
+                      0x7Efaf718667D9d8B658742d7e6Ad8AB9dD3EF064 ↗
+                    </a>
+                  </div>
+                  <div>
+                    <span className="text-[#EDEDED] block">REACTIVE LASNA RSC:</span>
+                    <a
+                      href="https://lasna.reactscan.net/address/0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[#E23B3B] hover:underline break-all"
+                    >
+                      0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16 ↗
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
       </main>
 
