@@ -65,6 +65,9 @@ contract DestinationCallback is AbstractCallback {
         address _authorizedReactiveContract
     ) AbstractCallback(_callbackRelayer, _authorizedReactiveContract) {}
 
+    /// @notice Accept native funds to cover callback gas billed by Reactive Network.
+    receive() external payable {}
+
     /**
      * @notice Registers or unregisters a pool authorized for JIT liquidity
      */
@@ -87,6 +90,7 @@ contract DestinationCallback is AbstractCallback {
      * @notice Main callback entry point triggered by Reactive Network relayer
      */
     function triggerJITLiquidity(
+        address reactiveSender,
         uint256 originChainId,
         address originPool,
         uint256 amount0In,
@@ -95,6 +99,10 @@ contract DestinationCallback is AbstractCallback {
         uint256 originTimestamp,
         uint256 originBlock
     ) external onlyAuthorized nonReentrant whenNotPaused returns (uint256 feeCaptured) {
+        require(
+            reactiveSender == authorizedReactiveContract,
+            "OmniSurgeCallback: unauthorized reactive"
+        );
         uint256 startGas = gasleft();
 
         // 1. Replay prevention

@@ -52,15 +52,15 @@ export const NETWORKS: Record<string, NetworkConfig> = {
 // Live Deployed OmniSurge Contract Addresses (Chain IDs: 84532, 1301, 5318007)
 export const CONTRACT_ADDRESSES: Record<string, Record<string, string>> = {
   baseSepolia: {
-    destinationCallback: "0xA2c90BE611c9Ddcc4757B0AB0834008a71452879",
-    mockPool: "0xCc5538B2F9C57Cdf075EB9C67bAcfEf8E4c2446B",
+    destinationCallback: "0x7Efaf718667D9d8B658742d7e6Ad8AB9dD3EF064",
+    mockPool: "0x4FE9DaC028D45C8895a1F1236176854E6cB67BBa",
   },
   unichainSepolia: {
-    mockPool: "0xCc5538B2F9C57Cdf075EB9C67bAcfEf8E4c2446B",
+    mockPool: "0x4FE9DaC028D45C8895a1F1236176854E6cB67BBa",
   },
   reactiveLasna: {
-    omniSurgeReactive: "0xA2c90BE611c9Ddcc4757B0AB0834008a71452879",
-    systemContract: "0x0000000000000000000000000000000000fffFfF",
+    omniSurgeReactive: "0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16",
+    systemContract: "0x8888888888888888888888888888888888888888",
   },
 };
 
@@ -99,13 +99,15 @@ export const OMNISURGE_REACTIVE_ABI = [
 export const DESTINATION_CALLBACK_ABI = [
   "event JITSurgeExecuted(uint256 indexed executionId, uint256 indexed originChainId, address indexed originPool, uint256 liquidityDeployed, uint256 feeCaptured, uint256 latencySeconds, uint256 latencyMsEstimated, uint256 gasUsed)",
   "event PoolRegistered(address indexed pool, bool isRegistered)",
-  "function triggerJITLiquidity(uint256,address,uint256,uint256,uint256,uint256,uint256) external returns (uint256)",
+  "function triggerJITLiquidity(address,uint256,address,uint256,uint256,uint256,uint256,uint256) external returns (uint256)",
   "function getLatestExecutions(uint256 count) external view returns (tuple(uint256 executionId, uint256 originChainId, address originPool, uint256 volumeIn, uint256 liquidityDeployed, uint256 feeCaptured, uint256 originTimestamp, uint256 originBlock, uint256 destinationTimestamp, uint256 destinationBlock, uint256 latencySeconds, uint256 latencyMsEstimated, uint256 gasUsed)[])",
   "function getProtocolMetrics() external view returns (uint256, uint256, uint256, uint256)",
   "function defaultFeeRateBps() external view returns (uint256)",
   "function registeredPools(address) external view returns (bool)",
   "function setPoolRegistration(address,bool) external",
   "function setAuthorizedReactiveContract(address) external",
+  "function callbackRelayer() external view returns (address)",
+  "function authorizedReactiveContract() external view returns (address)",
 ];
 
 export const MOCK_POOL_ABI = [

@@ -1,17 +1,23 @@
 {
-  "timestamp": "2026-11-16T16:32:31.895Z",
-  "network": "local-hardhat",
-  "stage1OriginSwapMs": 3,
-  "stage2ReactiveVMms": 4,
-  "stage3DestinationCallbackMs": 2,
-  "totalMs": 9,
-  "wallClockMs": 12,
-  "liquidityDeployed": "37500000000000000000",
-  "feeCaptured": "75000000000000000",
-  "gasUsed": "418082",
-  "txHashes": {
-    "originSwap": "0x0d22a6af0166319031b126f106856b91a77398acc022261baa5bba8aae3f6aed",
-    "reactiveReact": "0xf5fec6c08d74f9a4816112e85121e972cfaeade20cbc24fae575784cea2b5048",
-    "destinationCallback": "0x93e1edf7ca24697b35423b2311d347bc713fbe3a7664f709183293f594066d64"
-  }
+  "timestamp": "2026-11-22T09:53:28.040Z",
+  "benchmark": "OmniSurge End-to-End Reactive Loop",
+  "stages": {
+    "originSwap": {
+      "chain": "Base Sepolia (sim)",
+      "latencyMs": 4
+    },
+    "reactVM": {
+      "chain": "Reactive Lasna (sim)",
+      "latencyMs": 6
+    },
+    "destinationCallback": {
+      "chain": "Base Sepolia (sim)",
+      "latencyMs": 3
+    }
+  },
+  "totalStageMs": 13,
+  "wallClockMs": 19,
+  "liquidityDeployed": "37.5",
+  "feeCaptured": "0.075",
+  "gasUsed": "418082"
 }

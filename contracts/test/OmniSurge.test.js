@@ -11,7 +11,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
 
   const BASE_SEPOLIA_CHAIN_ID = 84532;
   const UNICHAIN_SEPOLIA_CHAIN_ID = 1301;
-  const UNISWAP_V2_SWAP_TOPIC = "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67";
+  const UNISWAP_V2_SWAP_TOPIC = "0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822";
 
   beforeEach(async function () {
     [owner, relayer, trader, attacker] = await ethers.getSigners();
@@ -52,88 +52,103 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
 
   describe("1. Pool Subscription & Parameter Configuration", function () {
     it("should correctly record origin pool subscriptions", async function () {
-      const basePoolConfig = await reactiveListener.originPools(BASE_SEPOLIA_CHAIN_ID, await originPoolBase.getAddress());
-      expect(basePoolConfig.isActive).to.equal(true);
-      expect(basePoolConfig.networkLabel).to.equal("Base Sepolia");
+      const baseSub = await reactiveListener.originPools(BASE_SEPOLIA_CHAIN_ID, await originPoolBase.getAddress());
+      expect(baseSub.isActive).to.be.true;
+      expect(baseSub.networkLabel).to.equal("Base Sepolia");
 
-      const unichainPoolConfig = await reactiveListener.originPools(UNICHAIN_SEPOLIA_CHAIN_ID, await originPoolUnichain.getAddress());
-      expect(unichainPoolConfig.isActive).to.equal(true);
-      expect(unichainPoolConfig.networkLabel).to.equal("Unichain Sepolia");
+      const unichainSub = await reactiveListener.originPools(UNICHAIN_SEPOLIA_CHAIN_ID, await originPoolUnichain.getAddress());
+      expect(unichainSub.isActive).to.be.true;
+      expect(unichainSub.networkLabel).to.equal("Unichain Sepolia");
     });
 
     it("should allow owner to update destination config and min threshold", async function () {
-      await reactiveListener.setMinImbalanceThreshold(ethers.parseEther("2.5"));
-      expect(await reactiveListener.minImbalanceThreshold()).to.equal(ethers.parseEther("2.5"));
+      const newThreshold = ethers.parseEther("2.5");
+      await reactiveListener.setDestinationConfig(1301, trader.address);
+      await reactiveListener.setMinImbalanceThreshold(newThreshold);
+
+      expect(await reactiveListener.destinationCallback()).to.equal(trader.address);
+      expect(await reactiveListener.destinationChainId()).to.equal(1301);
+      expect(await reactiveListener.minImbalanceThreshold()).to.equal(newThreshold);
     });
   });
 
   describe("2. Reactive Event Ingestion & Callback Emission", function () {
     it("should ignore swaps below the minimum imbalance threshold", async function () {
-      const smallSwapAmount = ethers.parseEther("0.2"); // Below 1.0 ETH threshold
-      const swapData = ethers.AbiCoder.defaultAbiCoder().encode(
+      // 0.2 ETH swap (below 1.0 ETH threshold)
+      const lowVolumeSwapData = ethers.AbiCoder.defaultAbiCoder().encode(
         ["uint256", "uint256", "uint256", "uint256"],
-        [smallSwapAmount, 0, 0, ethers.parseUnits("600", 6)]
+        [ethers.parseEther("0.2"), 0, 0, ethers.parseUnits("600", 6)]
       );
 
       const logRecord = {
-        chain_id: BASE_SEPOLIA_CHAIN_ID,
-        _contract: await originPoolBase.getAddress(),
-        topic_0: UNISWAP_V2_SWAP_TOPIC,
-        topic_1: 0,
-        topic_2: 0,
-        topic_3: 0,
-        data: swapData,
-        block_number: 10001,
-        op_code: 0,
+        chainId: BASE_SEPOLIA_CHAIN_ID,
+        contractAddress: await originPoolBase.getAddress(),
+        topic0: UNISWAP_V2_SWAP_TOPIC,
+        topic1: 0,
+        topic2: 0,
+        topic3: 0,
+        data: lowVolumeSwapData,
+        blockNumber: 1000,
+        opCode: 0,
+        blockHash: 0,
+        txHash: 0,
+        logIndex: 0,
       };
 
-      // react() called
-      const tx = await reactiveListener.react(logRecord);
-      const receipt = await tx.wait();
+      await expect(reactiveListener.react(logRecord)).to.not.emit(reactiveListener, "SurgeDispatched");
+      expect(await reactiveListener.totalSurgesDispatched()).to.equal(0);
+    });
 
-      // No Callback event emitted
-      const callbackEvents = receipt.logs.filter((log) => {
+    it("should detect massive swap and emit SurgeDispatched with system callback request", async function () {
+      const swapAmount = ethers.parseEther("15.0"); // 15 ETH
+      const swapData = ethers.AbiCoder.defaultAbiCoder().encode(
+        ["uint256", "uint256", "uint256", "uint256"],
+        [swapAmount, 0, 0, ethers.parseUnits("45000", 6)]
+      );
+
+      const originBlockNumber = 58663613;
+      const logRecord = {
+        chainId: BASE_SEPOLIA_CHAIN_ID,
+        contractAddress: await originPoolBase.getAddress(),
+        topic0: UNISWAP_V2_SWAP_TOPIC,
+        topic1: 0,
+        topic2: 0,
+        topic3: 0,
+        data: swapData,
+        blockNumber: originBlockNumber,
+        opCode: 0,
+        blockHash: 0,
+        txHash: 0,
+        logIndex: 0,
+      };
+
+      const reactTx = await reactiveListener.react(logRecord);
+      const reactReceipt = await reactTx.wait();
+
+      await expect(reactTx)
+        .to.emit(reactiveListener, "SurgeDispatched")
+        .withArgs(
+          1,
+          BASE_SEPOLIA_CHAIN_ID,
+          await originPoolBase.getAddress(),
+          swapAmount,
+          (swapAmount * 15000n) / 10000n,
+          (t) => t > 0,
+          originBlockNumber
+        );
+
+      // Verify mockSystem received callback request
+      const cbReq = reactReceipt.logs.find((l) => {
         try {
-          return reactiveListener.interface.parseLog(log)?.name === "Callback";
+          return mockSystem.interface.parseLog(l)?.name === "CallbackRequested";
         } catch {
           return false;
         }
       });
-      expect(callbackEvents.length).to.equal(0);
-      expect(await reactiveListener.totalSurgesDispatched()).to.equal(0);
-    });
-
-    it("should detect massive swap and emit Callback event with accurate latency payload", async function () {
-      const largeSwapAmount = ethers.parseEther("15.0"); // 15 ETH swap!
-      const swapData = ethers.AbiCoder.defaultAbiCoder().encode(
-        ["uint256", "uint256", "uint256", "uint256"],
-        [largeSwapAmount, 0, 0, ethers.parseUnits("45000", 6)]
-      );
-
-      const originBlockNumber = 502100;
-      const logRecord = {
-        chain_id: BASE_SEPOLIA_CHAIN_ID,
-        _contract: await originPoolBase.getAddress(),
-        topic_0: UNISWAP_V2_SWAP_TOPIC,
-        topic_1: 0,
-        topic_2: 0,
-        topic_3: 0,
-        data: swapData,
-        block_number: originBlockNumber,
-        op_code: 0,
-      };
-
-      await expect(reactiveListener.react(logRecord))
-        .to.emit(reactiveListener, "Callback")
-        .withArgs(
-          BASE_SEPOLIA_CHAIN_ID,
-          await destinationCallback.getAddress(),
-          850000,
-          (payload) => {
-            // Verify payload signature matches triggerJITLiquidity
-            return payload.startsWith(ethers.id("triggerJITLiquidity(uint256,address,uint256,uint256,uint256,uint256,uint256)").slice(0, 10));
-          }
-        );
+      expect(cbReq).to.not.be.undefined;
+      const parsedReq = mockSystem.interface.parseLog(cbReq);
+      expect(parsedReq.args.chainId).to.equal(BASE_SEPOLIA_CHAIN_ID);
+      expect(parsedReq.args.recipient).to.equal(await destinationCallback.getAddress());
 
       expect(await reactiveListener.totalSurgesDispatched()).to.equal(1);
     });
@@ -147,8 +162,9 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
       const latestBlock = await ethers.provider.getBlock("latest");
       const originTimestamp = latestBlock.timestamp - 1; // 1 second ago
 
-      // Relayer executes callback
+      // Relayer executes callback with reactive identity injected
       const tx = await destinationCallback.connect(relayer).triggerJITLiquidity(
+        await reactiveListener.getAddress(),
         BASE_SEPOLIA_CHAIN_ID,
         await originPoolBase.getAddress(),
         volumeIn,
@@ -186,6 +202,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
       const originTimestamp = latestBlock.timestamp; // same second
 
       await destinationCallback.connect(relayer).triggerJITLiquidity(
+        await reactiveListener.getAddress(),
         UNICHAIN_SEPOLIA_CHAIN_ID,
         await originPoolUnichain.getAddress(),
         0,
@@ -208,6 +225,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
 
       await expect(
         destinationCallback.connect(attacker).triggerJITLiquidity(
+          await reactiveListener.getAddress(),
           BASE_SEPOLIA_CHAIN_ID,
           await originPoolBase.getAddress(),
           volumeIn,
@@ -219,6 +237,24 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
       ).to.be.revertedWith("OmniSurgeCallback: unauthorized caller");
     });
 
+    it("SECURITY: prevents unauthorized reactive contract address injection", async function () {
+      const volumeIn = ethers.parseEther("10.0");
+      const targetLiquidity = ethers.parseEther("15.0");
+
+      await expect(
+        destinationCallback.connect(relayer).triggerJITLiquidity(
+          attacker.address, // Spoofed reactive identity
+          BASE_SEPOLIA_CHAIN_ID,
+          await originPoolBase.getAddress(),
+          volumeIn,
+          0,
+          targetLiquidity,
+          1000,
+          500
+        )
+      ).to.be.revertedWith("OmniSurgeCallback: unauthorized reactive");
+    });
+
     it("SECURITY: prevents replay attacks with identical execution parameters", async function () {
       const volumeIn = ethers.parseEther("8.0");
       const targetLiquidity = ethers.parseEther("12.0");
@@ -227,6 +263,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
 
       // First execution succeeds
       await destinationCallback.connect(relayer).triggerJITLiquidity(
+        await reactiveListener.getAddress(),
         BASE_SEPOLIA_CHAIN_ID,
         await originPoolBase.getAddress(),
         volumeIn,
@@ -239,6 +276,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
       // Second execution with identical hash must revert
       await expect(
         destinationCallback.connect(relayer).triggerJITLiquidity(
+          await reactiveListener.getAddress(),
           BASE_SEPOLIA_CHAIN_ID,
           await originPoolBase.getAddress(),
           volumeIn,
@@ -255,6 +293,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
 
       await expect(
         destinationCallback.connect(relayer).triggerJITLiquidity(
+          await reactiveListener.getAddress(),
           BASE_SEPOLIA_CHAIN_ID,
           await originPoolBase.getAddress(),
           ethers.parseEther("5.0"),
@@ -288,36 +327,39 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
       );
 
       const logRecord = {
-        chain_id: BASE_SEPOLIA_CHAIN_ID,
-        _contract: await originPoolBase.getAddress(),
-        topic_0: UNISWAP_V2_SWAP_TOPIC,
-        topic_1: 0,
-        topic_2: 0,
-        topic_3: 0,
+        chainId: BASE_SEPOLIA_CHAIN_ID,
+        contractAddress: await originPoolBase.getAddress(),
+        topic0: UNISWAP_V2_SWAP_TOPIC,
+        topic1: 0,
+        topic2: 0,
+        topic3: 0,
         data: swapData,
-        block_number: latestBlock.number,
-        op_code: 0,
+        blockNumber: latestBlock.number,
+        opCode: 0,
+        blockHash: 0,
+        txHash: 0,
+        logIndex: 0,
       };
 
       const reactTx = await reactiveListener.react(logRecord);
       const reactReceipt = await reactTx.wait();
 
-      // Extract Callback event payload
-      const callbackLog = reactReceipt.logs.find((l) => {
+      // Extract CallbackRequested event from mockSystem
+      const cbReqLog = reactReceipt.logs.find((l) => {
         try {
-          return reactiveListener.interface.parseLog(l)?.name === "Callback";
+          return mockSystem.interface.parseLog(l)?.name === "CallbackRequested";
         } catch {
           return false;
         }
       });
-      expect(callbackLog).to.not.be.undefined;
-      const parsedCallback = reactiveListener.interface.parseLog(callbackLog);
+      expect(cbReqLog).to.not.be.undefined;
+      const parsedCallback = mockSystem.interface.parseLog(cbReqLog);
 
       // 3. Relayer executes payload on DestinationCallback
       const destTx = await relayer.sendTransaction({
-        to: parsedCallback.args._contract,
+        to: parsedCallback.args.recipient,
         data: parsedCallback.args.payload,
-        gasLimit: parsedCallback.args.gas_limit,
+        gasLimit: parsedCallback.args.gasLimit,
       });
       const destReceipt = await destTx.wait();
 
@@ -340,4 +382,3 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
     });
   });
 });
-

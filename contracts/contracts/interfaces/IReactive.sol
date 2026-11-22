@@ -3,15 +3,18 @@ pragma solidity >=0.8.0;
 
 interface IReactive {
     struct LogRecord {
-        uint256 chain_id;
-        address _contract;
-        uint256 topic_0;
-        uint256 topic_1;
-        uint256 topic_2;
-        uint256 topic_3;
+        uint256 chainId;
+        address contractAddress;
+        uint256 topic0;
+        uint256 topic1;
+        uint256 topic2;
+        uint256 topic3;
         bytes data;
-        uint256 block_number;
-        uint256 op_code;
+        uint256 blockNumber;
+        uint256 opCode;
+        uint256 blockHash;
+        uint256 txHash;
+        uint256 logIndex;
     }
 
     event Callback(
@@ -21,6 +24,5 @@ interface IReactive {
         bytes payload
     );
 
-    function react(LogRecord calldata log) external;
+    function react(LogRecord memory log_) external;
 }
-

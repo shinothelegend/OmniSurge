@@ -12,7 +12,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const BASE_SEPOLIA_CHAIN_ID = 84532;
 const UNICHAIN_SEPOLIA_CHAIN_ID = 1301;
 const REACTIVE_LASNA_CHAIN_ID = 5318007;
-const SYSTEM_CONTRACT = "0x0000000000000000000000000000000000fffFfF";
+const SYSTEM_CONTRACT = "0x8888888888888888888888888888888888888888";
+const BASE_CALLBACK_PROXY = "0x476F44b11F5C942c58f4c8E3d0300E5710743585";
+const UNICHAIN_CALLBACK_PROXY = "0x775c9B990ADe401060B78D0e98684eEf8d2466C1";
 
 const DEPLOYMENTS_PATH = path.resolve(__dirname, "../deployments.json");
 
@@ -60,7 +62,7 @@ async function main() {
     console.log("📦 1/3 Deploying DestinationCallback...");
     const DestinationCallback = await ethers.getContractFactory("DestinationCallback");
     const destinationCallback = await DestinationCallback.deploy(
-      deployer.address,
+      BASE_CALLBACK_PROXY,
       ethers.ZeroAddress
     );
     await destinationCallback.waitForDeployment();
@@ -121,6 +123,14 @@ async function main() {
     await reactiveListener.waitForDeployment();
     const reactiveAddress = await reactiveListener.getAddress();
     console.log(`✅ OmniSurgeReactive: ${reactiveAddress}`);
+
+    console.log("💰 Funding OmniSurgeReactive with 0.05 lREACT for reactive gas...");
+    const fundTx = await deployer.sendTransaction({
+      to: reactiveAddress,
+      value: ethers.parseEther("0.05"),
+    });
+    await fundTx.wait();
+    console.log(`✅ Funded: ${fundTx.hash}`);
 
     // If Base Sepolia pool is available, subscribe
     if (deployments.baseSepolia.mockPool) {

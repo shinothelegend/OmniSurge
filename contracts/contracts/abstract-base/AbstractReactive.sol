@@ -5,8 +5,8 @@ import "../interfaces/IReactive.sol";
 import "../interfaces/ISystemContract.sol";
 
 abstract contract AbstractReactive is IReactive {
-    uint256 internal constant REACTIVE_IGNORE = 0xa65f96fc951c35eca466231422b7a70c47445526979f5cd1146f3415b3079bce;
-    address internal constant SYS_CONTRACT_DEFAULT = 0x0000000000000000000000000000000000fffFfF;
+    uint256 internal constant REACTIVE_IGNORE = 0xa65f96fc951c35ead38878e0f0b7a3c744a6f5ccc1476b313353ce31712313ad;
+    address internal constant SYS_CONTRACT_DEFAULT = 0x8888888888888888888888888888888888888888;
 
     ISystemContract public service;
     bool public vm;
@@ -47,6 +47,9 @@ abstract contract AbstractReactive is IReactive {
         }
         vm = (size == 0); // If system contract doesn't exist locally or caller is vm
     }
+
+    /// @notice Accept lREACT to cover reactive execution gas.
+    receive() external payable {}
 
     function setPaused(bool _paused) external onlyOwner {
         paused = _paused;

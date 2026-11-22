@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "./abstract-base/AbstractReactive.sol";
+import "./interfaces/ISystemContract.sol";
 
 /**
  * @title OmniSurgeReactive
@@ -13,7 +14,7 @@ contract OmniSurgeReactive is AbstractReactive {
     uint64 public constant CALLBACK_GAS_LIMIT = 850_000;
     
     // Uniswap V2 / standard Swap topic: Swap(address,uint256,uint256,uint256,uint256,address)
-    uint256 public constant UNISWAP_V2_SWAP_TOPIC = 0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67;
+    uint256 public constant UNISWAP_V2_SWAP_TOPIC = 0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822;
 
     struct OriginPoolConfig {
         uint256 chainId;
@@ -118,19 +119,19 @@ contract OmniSurgeReactive is AbstractReactive {
     }
 
     /**
-     * @notice Core Reactive entry point invoked by ReactVM upon origin chain log detection
+     * @notice Core Reactive entry point invoked by the Omni system contract upon origin chain log detection
      */
-    function react(LogRecord calldata log) external override vmOnly whenNotPaused {
+    function react(LogRecord memory log_) external override vmOnly whenNotPaused {
         totalEventsDetected++;
 
         // Verify if the event is a Swap topic
-        if (log.topic_0 != UNISWAP_V2_SWAP_TOPIC) {
+        if (log_.topic0 != UNISWAP_V2_SWAP_TOPIC) {
             return;
         }
 
         // Decode swap event data: (amount0In, amount1In, amount0Out, amount1Out)
         (uint256 amount0In, uint256 amount1In, , ) = abi.decode(
-            log.data,
+            log_.data,
             (uint256, uint256, uint256, uint256)
         );
 
@@ -146,39 +147,43 @@ contract OmniSurgeReactive is AbstractReactive {
         surgeCounter++;
         uint256 currentSurgeId = surgeCounter;
 
-        lastOriginBlock = log.block_number;
+        lastOriginBlock = log_.blockNumber;
         lastOriginTimestamp = block.timestamp; // Origin timestamp recorded
         lastReactTimestamp = block.timestamp;
         totalSurgesDispatched++;
 
-        // Formulate callback payload for DestinationCallback.sol
+        // Formulate callback payload for DestinationCallback.sol.
+        // The first argument is reserved for the reactive contract address,
+        // which the Reactive Network injects into the payload.
         bytes memory payload = abi.encodeWithSignature(
-            "triggerJITLiquidity(uint256,address,uint256,uint256,uint256,uint256,uint256)",
-            log.chain_id,
-            log._contract,
+            "triggerJITLiquidity(address,uint256,address,uint256,uint256,uint256,uint256,uint256)",
+            address(0),
+            log_.chainId,
+            log_.contractAddress,
             amount0In,
             amount1In,
             targetLiquidity,
             block.timestamp, // Origin emission timestamp benchmark
-            log.block_number
+            log_.blockNumber
         );
 
-        // Emit Callback event to be picked up by Reactive Relayers
-        emit Callback(
-            destinationChainId,
-            destinationCallback,
-            CALLBACK_GAS_LIMIT,
-            payload
+        service.requestCallbackV_1_0(
+            ISystemContract.CallbackConfiguration_V_1_0({
+                chainId: destinationChainId,
+                recipient: destinationCallback,
+                gasLimit: CALLBACK_GAS_LIMIT,
+                payload: payload
+            })
         );
 
         emit SurgeDispatched(
             currentSurgeId,
-            log.chain_id,
-            log._contract,
+            log_.chainId,
+            log_.contractAddress,
             volumeIn,
             targetLiquidity,
             block.timestamp,
-            log.block_number
+            log_.blockNumber
         );
     }
 

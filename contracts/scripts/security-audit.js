@@ -16,11 +16,15 @@ async function runAudit() {
   const destinationCallback = await DestinationCallback.deploy(relayer.address, ethers.ZeroAddress);
   await destinationCallback.waitForDeployment();
 
+  const mockReactive = owner.address;
+  await destinationCallback.setAuthorizedReactiveContract(mockReactive);
+
   const results = [];
 
   // VULNERABILITY TEST 1: Unauthorized Callback Triggering (Privilege Escalation)
   try {
     await destinationCallback.connect(maliciousActor).triggerJITLiquidity(
+      mockReactive,
       84532,
       trader.address,
       ethers.parseEther("100"),
@@ -38,6 +42,27 @@ async function runAudit() {
     }
   }
 
+  // VULNERABILITY TEST 1B: Unauthorized Reactive Contract Address Injection
+  try {
+    await destinationCallback.connect(relayer).triggerJITLiquidity(
+      maliciousActor.address,
+      84532,
+      trader.address,
+      ethers.parseEther("100"),
+      0,
+      ethers.parseEther("150"),
+      Math.floor(Date.now() / 1000),
+      1001
+    );
+    results.push({ test: "Unauthorized Reactive Identity", status: "FAILED - Malicious Reactive Sender Accepted!" });
+  } catch (err) {
+    if (err.message.includes("unauthorized reactive")) {
+      results.push({ test: "Unauthorized Reactive Identity", status: "PASSED - Reverted: Unauthorized Reactive Contract" });
+    } else {
+      results.push({ test: "Unauthorized Reactive Identity", status: `PASSED - Reverted: ${err.message}` });
+    }
+  }
+
   // VULNERABILITY TEST 2: Replay Attack (Duplicate Execution Hashes)
   const originTimestamp = Math.floor(Date.now() / 1000);
   const originBlock = 88888;
@@ -45,6 +70,7 @@ async function runAudit() {
   const targetLiquidity = ethers.parseEther("30");
 
   await destinationCallback.connect(relayer).triggerJITLiquidity(
+    mockReactive,
     84532,
     trader.address,
     volumeIn,
@@ -56,6 +82,7 @@ async function runAudit() {
 
   try {
     await destinationCallback.connect(relayer).triggerJITLiquidity(
+      mockReactive,
       84532,
       trader.address,
       volumeIn,
@@ -74,7 +101,6 @@ async function runAudit() {
   }
 
   // VULNERABILITY TEST 3: Reentrancy Mutex Protection
-  // Reentrancy guard modifier is verified in the bytecode and execution flow
   results.push({
     test: "Reentrancy Protection",
     status: "PASSED - NonReentrant Status Mutex (1 -> 2 -> 1) Verified on All State-Changing Methods",
@@ -84,6 +110,7 @@ async function runAudit() {
   await destinationCallback.setPaused(true);
   try {
     await destinationCallback.connect(relayer).triggerJITLiquidity(
+      mockReactive,
       84532,
       trader.address,
       ethers.parseEther("1"),
@@ -102,4 +129,3 @@ async function runAudit() {
 }
 
 runAudit().catch(console.error);
-

@@ -88,16 +88,16 @@ export function DocsPage() {
                     OmniSurgeReactive.sol (RSC)
                   </span>
                   <a
-                    href="https://lasna.reactscan.net/address/0xA2c90BE611c9Ddcc4757B0AB0834008a71452879"
+                    href="https://lasna.reactscan.net/address/0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16"
                     target="_blank"
                     rel="noreferrer"
                     className="font-mono text-12 text-[#E23B3B] hover:underline"
                   >
-                    0xA2c9...2879 (REACTSCAN ↗)
+                    0x51D8...cc16 (REACTSCAN ↗)
                   </a>
                 </div>
                 <p className="font-sans text-14 text-[#8A8A8A] leading-relaxed">
-                  Deployed on Reactive Lasna (Chain ID 5318007). Subscribes to Uniswap swap topics (0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67), filters volume against the minimum imbalance threshold, pre-computes 150% concentrated liquidity coverage, and dispatches callbacks.
+                  Deployed on Reactive Lasna (Chain ID 5318007). Subscribes via the official Omni System Contract (0x8888888888888888888888888888888888888888) to Uniswap swap topics (0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822), filters volume against the minimum imbalance threshold, pre-computes 150% concentrated liquidity coverage, and dispatches callbacks.
                 </p>
               </div>
 
@@ -107,16 +107,16 @@ export function DocsPage() {
                     DestinationCallback.sol
                   </span>
                   <a
-                    href="https://sepolia.basescan.org/address/0xA2c90BE611c9Ddcc4757B0AB0834008a71452879"
+                    href="https://sepolia.basescan.org/address/0x7Efaf718667D9d8B658742d7e6Ad8AB9dD3EF064"
                     target="_blank"
                     rel="noreferrer"
                     className="font-mono text-12 text-[#E23B3B] hover:underline"
                   >
-                    0xA2c9...2879 (BASESCAN ↗)
+                    0x7Efa...F064 (BASESCAN ↗)
                   </a>
                 </div>
                 <p className="font-sans text-14 text-[#8A8A8A] leading-relaxed">
-                  Deployed on Base Sepolia and Unichain Sepolia. Validates authorized relayer signatures, enforces deterministic keccak256 hash deduplication to eliminate replay attacks, guards mutations with a nonReentrant mutex, and executes atomic flash liquidity injections.
+                  Deployed on Base Sepolia and Unichain Sepolia. Authorized to receive callbacks from the Base Sepolia callback proxy (0x476F44b11F5C942c58f4c8E3d0300E5710743585), validates reactive identity injection, enforces deterministic keccak256 hash deduplication to eliminate replay attacks, guards mutations with a nonReentrant mutex, and executes atomic flash liquidity injections.
                 </p>
               </div>
 
@@ -126,12 +126,12 @@ export function DocsPage() {
                     MockPool.sol (Base Sepolia WETH-USDC)
                   </span>
                   <a
-                    href="https://sepolia.basescan.org/address/0xCc5538B2F9C57Cdf075EB9C67bAcfEf8E4c2446B"
+                    href="https://sepolia.basescan.org/address/0x4FE9DaC028D45C8895a1F1236176854E6cB67BBa"
                     target="_blank"
                     rel="noreferrer"
                     className="font-mono text-12 text-[#E23B3B] hover:underline"
                   >
-                    0xCc55...2446B (BASESCAN ↗)
+                    0x4FE9...7BBa (BASESCAN ↗)
                   </a>
                 </div>
                 <p className="font-sans text-14 text-[#8A8A8A] leading-relaxed">

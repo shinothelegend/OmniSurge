@@ -64,6 +64,40 @@ contract MockReactiveSystem is ISystemContract {
         }
     }
 
+    event CallbackRequested(
+        uint256 indexed chainId,
+        address indexed recipient,
+        uint64 gasLimit,
+        bytes payload
+    );
+
+    /**
+     * @notice Mimics the Omni system contract's callback request.
+     * @dev Replaces the first 32-byte word of the payload with msg.sender,
+     *      matching the real network's sender-authentication injection.
+     */
+    function requestCallbackV_1_0(
+        CallbackConfiguration_V_1_0 memory config_
+    ) external override {
+        bytes memory payload = config_.payload;
+        assembly {
+            mstore(add(payload, 36), caller())
+        }
+        emit CallbackRequested(
+            config_.chainId,
+            config_.recipient,
+            config_.gasLimit,
+            payload
+        );
+    }
+
+    function requestCallback(
+        CallbackVersion,
+        bytes memory
+    ) external pure override {
+        revert("MockReactiveSystem: requestCallback not implemented");
+    }
+
     /**
      * @notice Simulates the ReactVM receiving an origin log and passing it into react()
      */
@@ -77,19 +111,22 @@ contract MockReactiveSystem is ISystemContract {
         uint256 amount1Out,
         uint256 blockNumber
     ) external {
-        uint256 swapTopic0 = 0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67;
+        uint256 swapTopic0 = 0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822;
         bytes memory data = abi.encode(amount0In, amount1In, amount0Out, amount1Out);
 
         IReactive.LogRecord memory log = IReactive.LogRecord({
-            chain_id: chainId,
-            _contract: originPool,
-            topic_0: swapTopic0,
-            topic_1: 0,
-            topic_2: 0,
-            topic_3: 0,
+            chainId: chainId,
+            contractAddress: originPool,
+            topic0: swapTopic0,
+            topic1: 0,
+            topic2: 0,
+            topic3: 0,
             data: data,
-            block_number: blockNumber,
-            op_code: 0
+            blockNumber: blockNumber,
+            opCode: 0,
+            blockHash: 0,
+            txHash: 0,
+            logIndex: 0
         });
 
         IReactive(reactiveContract).react(log);
