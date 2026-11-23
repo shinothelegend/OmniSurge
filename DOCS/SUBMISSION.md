@@ -31,13 +31,15 @@ Verified on live testnets with `contracts/scripts/demo-loop.js` (see [`DOCS/proo
 | **2. ReactVM Log Processing** | Reactive Lasna (`5318007`) | State Verified on RSC | `61257228` | `612 ms` | [Reactscan ↗](https://lasna.reactscan.net/address/0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16) |
 | **3. Destination JIT Callback** | Base Sepolia (`84532`) | `0xe10b5fddc33dcc59458bff8f88dbffd5d4be389331eba9919c6ed52a9b9c0215` | `62124411` | `973 ms` | [Basescan ↗](https://sepolia.basescan.org/tx/0xe10b5fddc33dcc59458bff8f88dbffd5d4be389331eba9919c6ed52a9b9c0215) |
 
+**Total Measured Latency:** `~2,000 ms` roundtrip on live testnets (includes public RPC polling overhead). Sub-1.5s is the architectural target on Base Flashblocks. Reactive callbacks remove the human-in-the-loop bridging step entirely; see [`DOCS/proof-run.md`](proof-run.md).
+
 ---
 
-## 📊 Latency Benchmark Evidence (5 Consecutive Runs)
+## 📊 In-Contract Execution Overhead (Hardhat Local Simulation — Supplementary)
 
-Measured with `contracts/scripts/benchmark.js` (see [`DOCS/latency-benchmark.md`](latency-benchmark.md)):
+Measured with `contracts/scripts/benchmark.js` over 5 local EVM runs (see [`DOCS/latency-benchmark.md`](latency-benchmark.md)):
 
-| Metric | Origin Swap Detection | ReactVM Compute | Destination JIT Callback | Total End-to-End |
+| Metric | Origin Swap Detection | ReactVM Compute | Destination JIT Callback | Total In-Contract Overhead |
 | :--- | :--- | :--- | :--- | :--- |
 | **Minimum** | `2.0 ms` | `2.0 ms` | `2.0 ms` | `6.0 ms` |
 | **Median (p50)** | `3.0 ms` | `2.0 ms` | `2.0 ms` | `7.0 ms` |

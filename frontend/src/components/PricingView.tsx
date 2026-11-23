@@ -5,47 +5,46 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
 export function PricingView() {
-  const [billingCycle, setBillingCycle] = useState<"MONTHLY" | "ANNUAL">("MONTHLY");
+  const [billingCycle, setBillingCycle] = useState<"PUBLIC" | "OPERATOR">("PUBLIC");
 
   const plans = [
     {
       num: "01",
-      name: "STANDARD NODE",
-      price: billingCycle === "MONTHLY" ? "$15" : "$12",
-      period: "PER MONTH",
+      name: "COMMUNITY NODE",
+      price: "FREE",
+      period: "TESTNET ACCESS",
       desc: "For single-pool concentrated liquidity surveillance and autonomous execution.",
       features: [
         "Base Sepolia (200ms) mempool surveillance",
         "Up to 3 active concentrated pools",
         "Reactive Lasna standard execution lane",
-        "Slippage mitigation up to 50%",
+        "Deterministic replay deduplication",
         "Standard JSON-RPC latency telemetry",
       ],
-      cta: "START STANDARD NODE →",
+      cta: "EXPLORE COMMUNITY LANE →",
       isPrimary: false,
     },
     {
       num: "02",
-      name: "PROFESSIONAL PRO",
-      price: billingCycle === "MONTHLY" ? "$28" : "$22",
-      period: "PER MONTH",
+      name: "BUILDATHON OPERATOR",
+      price: "OPEN",
+      period: "HACKATHON DEPLOYMENT",
       desc: "Maximum speed for high-volume automated rebalancers and cross-chain flashes.",
       features: [
         "Unichain + Base dual-chain priority",
         "Unlimited active concentrated positions",
         "Sub-second Reactive callback priority lane",
-        "Slippage mitigation up to 88.4%",
-        "Instant atomic flash rebalancing",
-        "Automated Telegram & Discord alerts",
+        "Atomic same-block retraction guarantee",
+        "Live on-chain ring buffer telemetry",
       ],
-      cta: "ACTIVATE PRO LANE →",
+      cta: "ACTIVATE OPERATOR LANE →",
       isPrimary: true,
     },
     {
       num: "03",
-      name: "INSTITUTIONAL ENTERPRISE",
-      price: "CUSTOM",
-      period: "BESPOKE AGREEMENT",
+      name: "VALIDATOR VAULT",
+      price: "BESPOKE",
+      period: "CUSTOM DEPLOYMENT",
       desc: "Dedicated infrastructure for market makers and institutional vaults.",
       features: [
         "Co-located Reactive Network validator node",
@@ -65,7 +64,7 @@ export function PricingView() {
 
       <main className="flex-1 pt-32 pb-24">
         <div className="shell-container space-y-16">
-          {/* Header & Billing Cycle Controls */}
+          {/* Header & Controls */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-[#1E1E1E] pb-8">
             <div>
               <div className="flex items-center gap-2 font-mono text-12 text-[#8A8A8A] mb-2">
@@ -73,116 +72,95 @@ export function PricingView() {
                 <span className="uppercase tracking-wider">DEPLOYMENT TIERS & ACCESS</span>
               </div>
               <h1 className="font-sans text-40 sm:text-56 font-bold text-[#EDEDED] uppercase">
-                CHOOSE YOUR TIER.
+                ACCESS TIERS.
               </h1>
               <p className="font-sans text-14 text-[#8A8A8A] mt-2 max-w-xl">
-                Scale concentrated liquidity injection with sub-second finality on Base Sepolia and Unichain.
+                Open-source testnet deployment for the Reactive Omni Buildathon. Free community access on Base Sepolia and Unichain Sepolia.
               </p>
             </div>
 
-            {/* Rectangular Billing Cycle Switcher */}
-            <div className="flex items-center border border-[#1E1E1E] p-1 font-mono text-12 bg-[#0A0A0A]">
+            <div className="flex items-center gap-2 border border-[#1E1E1E] p-1 font-mono text-12 bg-[#0A0A0A]">
               <button
-                onClick={() => setBillingCycle("MONTHLY")}
+                onClick={() => setBillingCycle("PUBLIC")}
                 className={`px-3 py-1.5 rounded-[2px] transition-colors uppercase ${
-                  billingCycle === "MONTHLY"
+                  billingCycle === "PUBLIC"
                     ? "bg-[#1E1E1E] text-[#EDEDED] font-bold"
                     : "text-[#8A8A8A] hover:text-[#EDEDED]"
                 }`}
               >
-                Monthly
+                Public Testnet
               </button>
               <button
-                onClick={() => setBillingCycle("ANNUAL")}
+                onClick={() => setBillingCycle("OPERATOR")}
                 className={`px-3 py-1.5 rounded-[2px] transition-colors uppercase ${
-                  billingCycle === "ANNUAL"
+                  billingCycle === "OPERATOR"
                     ? "bg-[#1E1E1E] text-[#EDEDED] font-bold"
                     : "text-[#8A8A8A] hover:text-[#EDEDED]"
                 }`}
               >
-                Annual (20% Off)
+                Operator Lane
               </button>
             </div>
           </div>
 
-          {/* Editorial Tier Columns Separated by Hairline Borders */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 border border-[#1E1E1E] bg-[#0A0A0A]">
-            {plans.map((plan, idx) => (
+          {/* Editorial Tiers Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-[#1E1E1E] bg-[#0A0A0A]">
+            {plans.map((p, idx) => (
               <div
-                key={plan.name}
-                className={`p-8 sm:p-10 flex flex-col justify-between border-b lg:border-b-0 ${
-                  idx < 2 ? "lg:border-r border-[#1E1E1E]" : ""
-                } ${plan.isPrimary ? "bg-[#111111]" : "bg-[#0A0A0A]"}`}
+                key={p.num}
+                className={`p-8 flex flex-col justify-between space-y-8 ${
+                  idx < 2 ? "border-b md:border-b-0 md:border-r border-[#1E1E1E]" : ""
+                } ${p.isPrimary ? "bg-[#111111]" : "bg-[#0A0A0A]"}`}
               >
                 <div className="space-y-6">
                   <div className="flex justify-between items-baseline font-mono text-12">
-                    <span className="text-[#E23B3B] font-bold">({plan.num})</span>
-                    <span className="text-[#8A8A8A] uppercase">{plan.name}</span>
+                    <span className={p.isPrimary ? "text-[#E23B3B] font-bold" : "text-[#555555]"}>
+                      ({p.num})
+                    </span>
+                    <span className="text-[#8A8A8A] uppercase">
+                      {p.isPrimary ? "RECOMMENDED" : "STANDARD"}
+                    </span>
                   </div>
 
                   <div>
-                    <span className="font-mono text-40 font-bold text-[#EDEDED] tnum leading-none block">
-                      {plan.price}
+                    <h3 className="font-mono text-16 font-bold text-[#EDEDED] uppercase tracking-tight">
+                      {p.name}
+                    </h3>
+                    <p className="font-sans text-12 text-[#8A8A8A] mt-2 leading-relaxed">
+                      {p.desc}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-[#1E1E1E] space-y-1">
+                    <span className="block font-mono text-32 sm:text-40 font-bold text-[#EDEDED] tnum">
+                      {p.price}
                     </span>
-                    <span className="font-mono text-12 text-[#8A8A8A] uppercase mt-2 block">
-                      {plan.period}
+                    <span className="block font-mono text-12 text-[#555555] uppercase">
+                      {p.period}
                     </span>
                   </div>
 
-                  <p className="font-sans text-14 text-[#8A8A8A] leading-relaxed border-t border-b border-[#1E1E1E] py-4">
-                    {plan.desc}
-                  </p>
-
-                  <div className="space-y-3 font-mono text-12 text-[#8A8A8A]">
-                    <span className="text-[#EDEDED] font-bold block uppercase">
-                      INCLUDED CAPABILITIES:
-                    </span>
-                    {plan.features.map((feat) => (
-                      <div key={feat} className="flex items-start gap-2">
-                        <span className="text-[#E23B3B] font-bold">+</span>
-                        <span className="text-[#EDEDED]">{feat}</span>
-                      </div>
+                  <ul className="space-y-3 pt-4 border-t border-[#1E1E1E] font-mono text-12 text-[#8A8A8A]">
+                    {p.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2">
+                        <span className="text-[#EDEDED] font-bold">+</span>
+                        <span>{f}</span>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
 
-                <div className="pt-8">
+                <div className="pt-6">
                   <button
-                    className={`w-full ${plan.isPrimary ? "btn-rect-accent" : "btn-rect-ghost"}`}
+                    className={`w-full ${
+                      p.isPrimary ? "btn-rect-accent" : "btn-rect-ghost"
+                    }`}
                   >
-                    {plan.cta}
+                    {p.cta}
                   </button>
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Monospace FAQ Table */}
-          <div className="space-y-6 pt-10 border-t border-[#1E1E1E]">
-            <div className="flex items-center gap-2 font-mono text-12 text-[#8A8A8A]">
-              <span className="text-[#E23B3B] font-bold">( FAQ )</span>
-              <span className="uppercase tracking-wider">FREQUENTLY ANSWERED QUESTIONS</span>
-            </div>
-
-            <div className="border border-[#1E1E1E] divide-y divide-[#1E1E1E] font-mono text-12 bg-[#0A0A0A]">
-              <div className="p-6 space-y-2">
-                <span className="text-[#EDEDED] font-bold block">
-                  Q: HOW DOES OMNISURGE ELIMINATE IMPERMANENT LOSS?
-                </span>
-                <p className="text-[#8A8A8A] font-sans text-14">
-                  OmniSurge deploys concentrated liquidity only for the duration of the swap execution block and withdraws both the principal and harvested LP fees within the same block cycle, leaving zero capital exposed to directional price drift.
-                </p>
-              </div>
-
-              <div className="p-6 space-y-2">
-                <span className="text-[#EDEDED] font-bold block">
-                  Q: CAN I DEPLOY ON CUSTOM LIQUIDITY POOLS?
-                </span>
-                <p className="text-[#8A8A8A] font-sans text-14">
-                  Yes. Custom Uniswap v3/v4 pools on Base Sepolia and Unichain Sepolia can be registered through the DestinationCallback contract by authorized owners.
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </main>

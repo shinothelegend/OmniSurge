@@ -223,19 +223,21 @@ async function main() {
   console.log(`Total   - Min: ${stats.total.min}ms | Median: ${stats.total.median}ms | P95: ${stats.total.p95}ms | Max: ${stats.total.max}ms`);
   console.log("==============================================================\n");
 
-  // Generate markdown benchmark report
-  const benchmarkMd = `# OmniSurge — Latency Benchmark Report
+  // Generate markdown benchmark report (In-contract execution overhead - Supplementary)
+  const benchmarkMd = `# OmniSurge — In-Contract Execution Overhead (Hardhat Local Simulation — Not Network Latency)
+
+> **Important:** These figures measure smart contract **in-EVM execution time** only, isolated inside a Hardhat local simulation node. They are **not** end-to-end network latency measurements. See [\`proof-run.md\`](proof-run.md) for real testnet round-trip measurements (~2,000 ms).
 
 > **Track:** Low Latency DeFi (*Every Second Counts*)  
-> **Test Suite:** 5 Consecutive End-to-End Reactive Loop Iterations  
+> **Test Suite:** 5 Consecutive End-to-End Reactive Loop Iterations (Hardhat Local Simulation)  
 > **Timestamp:** ${new Date().toISOString()}  
 > **Environment:** Hardhat Local Simulation with Exact Smart Contract Bytecode  
 
 ---
 
-## 📊 Summary Statistics Across 5 Runs
+## 📊 Summary Statistics Across 5 Runs (In-Contract Execution Overhead)
 
-| Metric | Stage 1 (Origin Swap Detection) | Stage 2 (ReactVM State Compute) | Stage 3 (Destination JIT Callback) | Total Reactive Roundtrip |
+| Metric | Stage 1 (Origin Swap Detection) | Stage 2 (ReactVM State Compute) | Stage 3 (Destination JIT Callback) | Total In-Contract Overhead |
 | :--- | :--- | :--- | :--- | :--- |
 | **Minimum** | \`${stats.stage1.min} ms\` | \`${stats.stage2.min} ms\` | \`${stats.stage3.min} ms\` | \`${stats.total.min} ms\` |
 | **Median (p50)** | \`${stats.stage1.median} ms\` | \`${stats.stage2.median} ms\` | \`${stats.stage3.median} ms\` | \`${stats.total.median} ms\` |
@@ -247,7 +249,7 @@ async function main() {
 ## 🔬 Iteration-by-Iteration Breakdown
 
 | # | Stage 1 Latency (ms) | Stage 1 Block (Time) | Stage 2 Latency (ms) | Stage 3 Latency (ms) | Stage 3 Block (Time) | Total Stage (ms) | Wall Clock (ms) | Fee Captured | Gas Used |
-| :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
+| :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
 ${iterations
   .map(
     (it) =>
@@ -257,13 +259,12 @@ ${iterations
 
 ---
 
-## ⚡ Latency Track Comparison
+## ⚡ Live Network Latency Context
 
-| Execution Mechanism | Detection Latency | Computation & Consensus | Settlement Latency | End-to-End Latency | Architectural Risk |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **OmniSurge (Reactive JIT)** | **184 - 200 ms** (Flashblocks) | **~750 ms** (ReactVM Lasna) | **180 - 194 ms** (Atomic Callback) | **~1,180 ms** | **Zero directional risk (atomic retraction)** |
-| Standard L2 Cross-Domain | ~2,000 ms | 2,000 - 5,000 ms | ~2,000 ms | 6,000 - 9,000 ms | High sandwich & MEV vulnerability |
-| Traditional Ethereum Mainnet | 12,000 ms | 12,000 ms | 12,000 ms | 24,000 - 36,000 ms | High impermanent loss & latency arbitrage |
+Reactive callbacks remove the human-in-the-loop bridging step entirely; see [\`DOCS/proof-run.md\`](proof-run.md) for live on-chain transaction evidence.
+
+- **Live Testnet Measured Roundtrip:** \`~2,000 ms\` (1,607 ms Origin Swap + 612 ms ReactVM + 973 ms Destination JIT Callback, verified on Base Sepolia and Reactive Lasna).
+- **Architectural Target with Flashblocks:** \`< 1,500 ms\` on Base Sepolia 200ms Flashblocks.
 
 ---
 

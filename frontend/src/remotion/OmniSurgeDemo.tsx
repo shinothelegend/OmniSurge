@@ -253,15 +253,15 @@ export const OmniSurgeDemo: React.FC = () => {
       >
         <div style={{ display: "flex", gap: "48px" }}>
           <div>
-            <div style={{ fontSize: "12px", color: "#8A8A8A", fontFamily: "monospace" }}>TOTAL ROUNDTRIP</div>
+            <div style={{ fontSize: "12px", color: "#8A8A8A", fontFamily: "monospace" }}>MEASURED ROUNDTRIP</div>
             <div style={{ fontSize: "20px", fontWeight: "bold", color: "#EDEDED", fontFamily: "monospace" }}>
-              1,184 ms
+              ~2,000 ms
             </div>
           </div>
           <div>
             <div style={{ fontSize: "12px", color: "#8A8A8A", fontFamily: "monospace" }}>FEE HARVESTED</div>
             <div style={{ fontSize: "20px", fontWeight: "bold", color: "#EDEDED", fontFamily: "monospace" }}>
-              +0.1500 ETH ($472.50)
+              +0.0150 ETH
             </div>
           </div>
           <div>

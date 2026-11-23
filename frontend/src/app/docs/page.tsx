@@ -36,40 +36,48 @@ export function DocsPage() {
               By pairing ultra-fast Layer 2 block times (Base Sepolia’s 200ms Flashblocks and Unichain Sepolia’s 1s blocks) with the event-driven execution architecture of the Reactive Network (~1s finality), OmniSurge listens for pool imbalance swap events, computes the optimal concentrated liquidity tick range in ReactVM, and triggers an atomic callback to flash-deploy liquidity right into the active tick before instantly rebalancing out to safe reserves.
             </p>
 
-            {/* Timing Breakdown Table */}
+            {/* Timing Breakdown Table — source: DOCS/proof-run.md (Live Testnet) */}
             <div className="border border-[#1E1E1E] bg-[#0A0A0A] overflow-x-auto">
               <table className="editorial-table">
                 <thead>
                   <tr>
                     <th>STAGE</th>
                     <th>TARGET</th>
-                    <th className="text-right">MEASURED CADENCE</th>
+                    <th className="text-right">MEASURED LATENCY (TESTNET)</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="text-[#EDEDED] font-bold">STAGE 01: DETECTION</td>
-                    <td className="text-[#8A8A8A]">Base Sepolia Flashblocks / Unichain</td>
-                    <td className="text-right text-[#EDEDED] tnum font-bold">190 - 200 ms</td>
+                    <td className="text-[#EDEDED] font-bold">STAGE 01: ORIGIN SWAP</td>
+                    <td className="text-[#8A8A8A]">Base Sepolia (Tx: 0x62084c... Block 62124403)</td>
+                    <td className="text-right text-[#EDEDED] tnum font-bold">1,607 ms</td>
                   </tr>
                   <tr>
                     <td className="text-[#EDEDED] font-bold">STAGE 02: REACTVM</td>
-                    <td className="text-[#8A8A8A]">Reactive Lasna Testnet (Chain ID 5318007)</td>
-                    <td className="text-right text-[#EDEDED] tnum font-bold">740 - 790 ms</td>
+                    <td className="text-[#8A8A8A]">Reactive Lasna (RSC 0x51D8... Block 61257228)</td>
+                    <td className="text-right text-[#EDEDED] tnum font-bold">612 ms</td>
                   </tr>
                   <tr>
                     <td className="text-[#EDEDED] font-bold">STAGE 03: CALLBACK</td>
-                    <td className="text-[#8A8A8A]">Destination DEX Pool Flash Injection</td>
-                    <td className="text-right text-[#EDEDED] tnum font-bold">180 - 200 ms</td>
+                    <td className="text-[#8A8A8A]">Base Sepolia JIT (Tx: 0xe10b5f... Block 62124411)</td>
+                    <td className="text-right text-[#EDEDED] tnum font-bold">973 ms</td>
                   </tr>
                   <tr className="bg-[#111111]">
-                    <td className="text-[#EDEDED] font-bold">TOTAL ROUNDTRIP</td>
-                    <td className="text-[#8A8A8A]">Sub-second end-to-end execution loop</td>
-                    <td className="text-right text-[#E23B3B] tnum font-bold">~1.18 s</td>
+                    <td className="text-[#EDEDED] font-bold">TOTAL MEASURED ROUNDTRIP</td>
+                    <td className="text-[#8A8A8A]">Live testnets (includes public RPC polling)</td>
+                    <td className="text-right text-[#E23B3B] tnum font-bold">~2,000 ms</td>
+                  </tr>
+                  <tr>
+                    <td className="text-[#8A8A8A]">ARCHITECTURAL TARGET</td>
+                    <td className="text-[#8A8A8A]">Base Flashblocks (200ms) + Fast Reactive Lane</td>
+                    <td className="text-right text-[#8A8A8A] tnum font-bold">&lt; 1,500 ms (Target)</td>
                   </tr>
                 </tbody>
               </table>
             </div>
+            <p className="font-mono text-12 text-[#555555]">
+              Reactive callbacks remove the human-in-the-loop bridging step entirely; see DOCS/proof-run.md for transaction proofs.
+            </p>
           </section>
 
           {/* Section 02: Smart Contract Suite */}

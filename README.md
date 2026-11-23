@@ -41,6 +41,9 @@ Every step of the OmniSurge reactive pipeline has been verified on live testnets
 - **Liquidity Deployed:** `7.5 ETH` (150% coverage)
 - **Fee Captured:** `+0.015 ETH` (30 bps)
 - **Impermanent Loss Window:** `0 seconds` (atomic single-block deposit and withdrawal)
+- **Measured Roundtrip Latency:** `~2,000 ms` on live testnets (includes public RPC polling overhead); sub-1.5s is the architecture target with Flashblocks
+
+Reactive callbacks remove the human-in-the-loop bridging step entirely; see [`DOCS/proof-run.md`](DOCS/proof-run.md) for full transaction evidence.
 
 ---
 
@@ -71,16 +74,18 @@ Every step of the OmniSurge reactive pipeline has been verified on live testnets
                                                                                      │    - Telemetry Ring Buffer
 ```
 
-### Statistical Latency Evidence (5-Run Consecutive Benchmark)
+### In-Contract Execution Overhead (Hardhat Local Simulation — Supplementary)
 
-Measured using `contracts/scripts/benchmark.js` over 5 consecutive full-loop iterations (full report in [`DOCS/latency-benchmark.md`](DOCS/latency-benchmark.md)):
+> **Important:** These figures measure smart contract EVM execution overhead in local simulation (`npx hardhat run scripts/benchmark.js`). They reflect EVM computational overhead, not live network transport latency. See [Proof-of-Life Trail](#-proof-of-life-execution-trail) above for live testnet measurements (~2,000 ms roundtrip). Reactive callbacks remove the human-in-the-loop bridging step entirely; see proof run.
+
+Measured using `contracts/scripts/benchmark.js` over 5 consecutive local EVM iterations (full report in [`DOCS/latency-benchmark.md`](DOCS/latency-benchmark.md)):
 
 | Benchmark Stage | Target Environment | Minimum | Median (p50) | p95 | Maximum |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Stage 1: Origin Detection** | Base Sepolia Flashblocks | `2.0 ms` | `3.0 ms` | `3.0 ms` | `3.0 ms` |
-| **Stage 2: ReactVM Compute** | Reactive Lasna (EVM) | `2.0 ms` | `2.0 ms` | `2.0 ms` | `2.0 ms` |
-| **Stage 3: Destination Callback** | Base Sepolia Atomic JIT | `2.0 ms` | `2.0 ms` | `2.8 ms` | `3.0 ms` |
-| **Total Roundtrip Latency** | Full End-to-End Loop | `6.0 ms` | `7.0 ms` | `7.8 ms` | `8.0 ms` |
+| **Stage 1: Origin Detection** | Local EVM | `2.0 ms` | `3.0 ms` | `3.0 ms` | `3.0 ms` |
+| **Stage 2: ReactVM Compute** | Local EVM | `2.0 ms` | `2.0 ms` | `2.0 ms` | `2.0 ms` |
+| **Stage 3: Destination Callback** | Local EVM | `2.0 ms` | `2.0 ms` | `2.8 ms` | `3.0 ms` |
+| **Total In-Contract Overhead** | Full Local Loop | `6.0 ms` | `7.0 ms` | `7.8 ms` | `8.0 ms` |
 
 ---
 

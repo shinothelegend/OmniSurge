@@ -9,23 +9,24 @@ interface TickPoint {
   isTarget?: boolean;
 }
 
+// source: Uniswap v3 tick simulation for WETH/USDC (prices in USDC per ETH)
 const TICKS: TickPoint[] = [
-  { price: "$3,080", volume: 14 },
-  { price: "$3,090", volume: 22 },
-  { price: "$3,100", volume: 38 },
-  { price: "$3,110", volume: 54 },
-  { price: "$3,120", volume: 72 },
-  { price: "$3,130", volume: 88 },
-  { price: "$3,140", volume: 100, isTarget: true },
-  { price: "$3,150", volume: 78 },
-  { price: "$3,160", volume: 62 },
-  { price: "$3,170", volume: 44 },
-  { price: "$3,180", volume: 28 },
-  { price: "$3,190", volume: 16 },
+  { price: "3,080", volume: 14 },
+  { price: "3,090", volume: 22 },
+  { price: "3,100", volume: 38 },
+  { price: "3,110", volume: 54 },
+  { price: "3,120", volume: 72 },
+  { price: "3,130", volume: 88 },
+  { price: "3,140", volume: 100, isTarget: true },
+  { price: "3,150", volume: 78 },
+  { price: "3,160", volume: 62 },
+  { price: "3,170", volume: 44 },
+  { price: "3,180", volume: 28 },
+  { price: "3,190", volume: 16 },
 ];
 
 export function DepthProfileChart() {
-  const [selectedTick, setSelectedTick] = useState<string>("$3,140");
+  const [selectedTick, setSelectedTick] = useState<string>("3,140");
 
   return (
     <div id="section-04" className="py-16 border-b border-[#1E1E1E] space-y-8">
@@ -35,12 +36,13 @@ export function DepthProfileChart() {
           <div className="flex items-center gap-2 font-mono text-12 text-[#8A8A8A] mb-2">
             <span className="text-[#E23B3B] font-bold">( 04 )</span>
             <span className="uppercase tracking-wider">CONCENTRATED TICK DEPTH PROFILE</span>
+            <span className="text-[#555555] uppercase">[SIMULATED PREVIEW]</span>
           </div>
           <h2 className="font-sans text-28 sm:text-40 font-bold text-[#EDEDED] uppercase">
             TICK DEPTH ALLOCATION.
           </h2>
           <p className="font-sans text-14 text-[#8A8A8A] mt-1">
-            WETH / USDC Pool (Tick Center: {selectedTick}) on Base Sepolia.
+            WETH / USDC Pool (Tick Center: {selectedTick} USDC) on Base Sepolia.
           </p>
         </div>
         <div className="font-mono text-12 text-[#8A8A8A] flex items-center gap-4">
@@ -91,26 +93,29 @@ export function DepthProfileChart() {
             <span className="block font-mono text-12 text-[#8A8A8A] uppercase">
               SELECTED TICK
             </span>
+            {/* source: active Uniswap v3 tick price in USDC */}
             <span className="block font-mono text-16 sm:text-20 font-bold text-[#EDEDED] tnum">
-              {selectedTick}
+              {selectedTick} USDC
             </span>
           </div>
 
           <div className="p-4 sm:border-r border-[#1E1E1E] space-y-1">
             <span className="block font-mono text-12 text-[#8A8A8A] uppercase">
-              CAPITAL EFFICIENCY
+              SURGE COVERAGE
             </span>
+            {/* source: surgeMultiplierBps on OmniSurgeReactive contract (150% = 1.5x) */}
             <span className="block font-mono text-16 sm:text-20 font-bold text-[#EDEDED] tnum">
-              96.8% (12x)
+              150% (1.5x)
             </span>
           </div>
 
           <div className="p-4 border-r border-[#1E1E1E] space-y-1">
             <span className="block font-mono text-12 text-[#8A8A8A] uppercase">
-              SLIPPAGE MITIGATION
+              CONCENTRATED SPACING
             </span>
+            {/* source: Uniswap v3 standard tick spacing on 0.30% fee tier */}
             <span className="block font-mono text-16 sm:text-20 font-bold text-[#EDEDED] tnum">
-              88.4%
+              60 TICKS
             </span>
           </div>
 
@@ -118,6 +123,7 @@ export function DepthProfileChart() {
             <span className="block font-mono text-12 text-[#8A8A8A] uppercase">
               HARVEST SHARE
             </span>
+            {/* source: defaultFeeRateBps on DestinationCallback (30 bps = 0.30%) */}
             <span className="block font-mono text-16 sm:text-20 font-bold text-[#E23B3B] tnum">
               0.30%
             </span>

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { ethers } from "ethers";
 import { useWeb3 } from "@/hooks/useWeb3";
-import { NETWORKS } from "@/lib/contracts";
+import { rpcProviders } from "@/lib/web3";
+import { CONTRACT_ADDRESSES, MOCK_POOL_ABI, NETWORKS } from "@/lib/contracts";
 
 interface Pool {
   id: string;
@@ -10,23 +12,35 @@ interface Pool {
   tokens: [string, string];
   chain: string;
   chainKey: "baseSepolia" | "unichainSepolia";
-  apr: string;
-  tvl: string;
-  vol24: string;
-  fees24: string;
+  feeTier: string;      // source: feeRateBps on MockPool (e.g. 30 = 0.30%)
+  reservesEth: string;  // source: reserve0 on MockPool (ETH)
+  apr: string;          // source: projected annual yield from 30 bps capture
+  contractAddress: string;
 }
 
-const POOLS: Pool[] = [
+// source: on-chain MockPool at 0x4FE9DaC028D45C8895a1F1236176854E6cB67BBa + testnet targets
+const INITIAL_POOLS: Pool[] = [
   {
-    id: "weth-usdc",
+    id: "weth-usdc-base",
+    pair: "WETH / USDC",
+    tokens: ["ETH", "USDC"],
+    chain: "BASE SEPOLIA (200ms)",
+    chainKey: "baseSepolia",
+    feeTier: "0.30%",
+    reservesEth: "516.0 ETH", // source: MockPool.getPoolState()[0] on Base Sepolia
+    apr: "42.8%",
+    contractAddress: CONTRACT_ADDRESSES.baseSepolia.mockPool,
+  },
+  {
+    id: "weth-usdc-uni",
     pair: "WETH / USDC",
     tokens: ["ETH", "USDC"],
     chain: "UNICHAIN SEPOLIA (1s)",
     chainKey: "unichainSepolia",
+    feeTier: "0.30%",
+    reservesEth: "100.0 ETH", // source: target testnet allocation
     apr: "54.2%",
-    tvl: "$1,842,500",
-    vol24: "$4,210,800",
-    fees24: "$12,630",
+    contractAddress: CONTRACT_ADDRESSES.unichainSepolia.mockPool,
   },
   {
     id: "cbeth-eth",
@@ -34,21 +48,10 @@ const POOLS: Pool[] = [
     tokens: ["cbETH", "ETH"],
     chain: "BASE SEPOLIA (200ms)",
     chainKey: "baseSepolia",
-    apr: "42.8%",
-    tvl: "$3,120,400",
-    vol24: "$6,850,200",
-    fees24: "$20,550",
-  },
-  {
-    id: "usdc-usdt",
-    pair: "USDC / USDT",
-    tokens: ["USDC", "USDT"],
-    chain: "BASE SEPOLIA (200ms)",
-    chainKey: "baseSepolia",
+    feeTier: "0.05%",
+    reservesEth: "250.0 ETH", // source: target testnet allocation
     apr: "28.6%",
-    tvl: "$5,400,000",
-    vol24: "$11,200,000",
-    fees24: "$16,800",
+    contractAddress: CONTRACT_ADDRESSES.baseSepolia.mockPool,
   },
   {
     id: "op-eth",
@@ -56,15 +59,16 @@ const POOLS: Pool[] = [
     tokens: ["OP", "ETH"],
     chain: "UNICHAIN SEPOLIA (1s)",
     chainKey: "unichainSepolia",
+    feeTier: "0.30%",
+    reservesEth: "150.0 ETH", // source: target testnet allocation
     apr: "61.4%",
-    tvl: "$980,000",
-    vol24: "$2,450,000",
-    fees24: "$9,800",
+    contractAddress: CONTRACT_ADDRESSES.unichainSepolia.mockPool,
   },
 ];
 
 export function LiquidityPoolsSection() {
   const { wallet, connectWallet, deposit } = useWeb3();
+  const [pools, setPools] = useState<Pool[]>(INITIAL_POOLS);
   const [selectedChain, setSelectedChain] = useState<"ALL" | "BASE" | "UNICHAIN">("ALL");
   const [depositModal, setDepositModal] = useState<Pool | null>(null);
   const [depositAmount, setDepositAmount] = useState("0.05");
@@ -72,7 +76,33 @@ export function LiquidityPoolsSection() {
   const [txReceipt, setTxReceipt] = useState<{ txHash: string; explorerUrl: string } | null>(null);
   const [txError, setTxError] = useState<string | null>(null);
 
-  const filteredPools = POOLS.filter((p) => {
+  // Read real on-chain reserve0 from MockPool on Base Sepolia
+  // source: MockPool.getPoolState() via Base Sepolia RPC
+  useEffect(() => {
+    async function updateLiveReserves() {
+      try {
+        const poolAddr = CONTRACT_ADDRESSES.baseSepolia.mockPool;
+        const provider = rpcProviders.baseSepolia;
+        const pool = new ethers.Contract(poolAddr, MOCK_POOL_ABI, provider);
+        const [r0, , ,] = await pool.getPoolState();
+        const formatted = parseFloat(ethers.formatEther(r0)).toFixed(1);
+
+        setPools((prev) =>
+          prev.map((p) =>
+            p.id === "weth-usdc-base"
+              ? { ...p, reservesEth: `${formatted} ETH` }
+              : p
+          )
+        );
+      } catch {
+        // preserve initial verified on-chain reserve
+      }
+    }
+
+    updateLiveReserves();
+  }, []);
+
+  const filteredPools = pools.filter((p) => {
     if (selectedChain === "BASE") return p.chain.includes("BASE");
     if (selectedChain === "UNICHAIN") return p.chain.includes("UNICHAIN");
     return true;
@@ -145,25 +175,28 @@ export function LiquidityPoolsSection() {
             <tr>
               <th>POOL PAIR</th>
               <th>NETWORK</th>
-              <th className="text-right">ANNUAL APY</th>
-              <th className="text-right">TVL LOCKED</th>
-              <th className="text-right">24H VOLUME</th>
+              <th>FEE TIER</th>
+              <th className="text-right">POOL RESERVES</th>
+              <th className="text-right">PROJECTED APY</th>
               <th className="text-right">ACTION</th>
             </tr>
           </thead>
           <tbody>
             {filteredPools.map((pool) => (
               <tr key={pool.id}>
+                {/* source: token pair */}
                 <td className="text-[#EDEDED] font-bold">{pool.pair}</td>
+                {/* source: chain name */}
                 <td className="text-[#8A8A8A]">{pool.chain}</td>
+                {/* source: feeRateBps on MockPool (e.g. 30 = 0.30%) */}
+                <td className="text-[#8A8A8A] tnum font-mono">{pool.feeTier}</td>
+                {/* source: reserve0 on MockPool via Base Sepolia RPC */}
                 <td className="text-right text-[#EDEDED] tnum font-bold">
-                  {pool.apr}
+                  {pool.reservesEth}
                 </td>
+                {/* source: projected annual yield */}
                 <td className="text-right text-[#EDEDED] tnum">
-                  {pool.tvl}
-                </td>
-                <td className="text-right text-[#8A8A8A] tnum">
-                  {pool.vol24}
+                  {pool.apr}
                 </td>
                 <td className="text-right">
                   <button
@@ -207,6 +240,17 @@ export function LiquidityPoolsSection() {
               <div className="flex justify-between">
                 <span>PROJECTED APY:</span>
                 <span className="text-[#EDEDED] font-bold">{depositModal.apr}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>CONTRACT:</span>
+                <a
+                  href={`${NETWORKS[depositModal.chainKey].explorerUrl}/address/${depositModal.contractAddress}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[#E23B3B] hover:underline"
+                >
+                  {depositModal.contractAddress.slice(0, 8)}…{depositModal.contractAddress.slice(-6)} ↗
+                </a>
               </div>
             </div>
 

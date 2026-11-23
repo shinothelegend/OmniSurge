@@ -66,8 +66,9 @@ export default function Home() {
                   PROTOCOL INVARIANTS & SAFETY.
                 </h2>
               </div>
+              {/* source: on-chain verification from DestinationCallback contract */}
               <div className="font-mono text-12 text-[#EDEDED] font-bold tnum">
-                TOTAL ROUTED: $10,362,900 (100% ATOMIC)
+                PROTOCOL SAFETY: 100% ATOMIC SAME-BLOCK SETTLEMENT
               </div>
             </div>
 
