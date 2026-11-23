@@ -49,23 +49,23 @@ export function DocsPage() {
                 <tbody>
                   <tr>
                     <td className="text-[#EDEDED] font-bold">STAGE 01: ORIGIN SWAP</td>
-                    <td className="text-[#8A8A8A]">Base Sepolia (Tx: 0xe28102... Block 62595418)</td>
-                    <td className="text-right text-[#EDEDED] tnum font-bold">1524 ms</td>
+                    <td className="text-[#8A8A8A]">Base Sepolia (Tx: 0x2cfb35... Block 62598747)</td>
+                    <td className="text-right text-[#EDEDED] tnum font-bold">1634 ms</td>
                   </tr>
                   <tr>
                     <td className="text-[#EDEDED] font-bold">STAGE 02: REACTVM</td>
-                    <td className="text-[#8A8A8A]">Reactive Lasna (RSC 0x51D8... Block 9059332)</td>
-                    <td className="text-right text-[#EDEDED] tnum font-bold">1109 ms</td>
+                    <td className="text-[#8A8A8A]">Reactive Lasna (RSC 0x51D8... Block 9059944)</td>
+                    <td className="text-right text-[#EDEDED] tnum font-bold">983 ms</td>
                   </tr>
                   <tr>
                     <td className="text-[#EDEDED] font-bold">STAGE 03: CALLBACK</td>
-                    <td className="text-[#8A8A8A]">Base Sepolia JIT (Tx: 0xeb6218... Block 62595429)</td>
-                    <td className="text-right text-[#EDEDED] tnum font-bold">967 ms</td>
+                    <td className="text-[#8A8A8A]">Base Sepolia JIT (Tx: 0xb44aaf... Block 62598758)</td>
+                    <td className="text-right text-[#EDEDED] tnum font-bold">1015 ms</td>
                   </tr>
                   <tr className="bg-[#111111]">
                     <td className="text-[#EDEDED] font-bold">TOTAL MEASURED ROUNDTRIP</td>
                     <td className="text-[#8A8A8A]">Live testnets (includes public RPC submission)</td>
-                    <td className="text-right text-[#E23B3B] tnum font-bold">~3,600 ms</td>
+                    <td className="text-right text-[#E23B3B] tnum font-bold">~3,632 ms</td>
                   </tr>
                   <tr>
                     <td className="text-[#8A8A8A]">ARCHITECTURAL TARGET</td>

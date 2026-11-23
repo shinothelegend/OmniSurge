@@ -32,16 +32,16 @@ Every step of the OmniSurge reactive pipeline has been verified on live testnets
 
 | Pipeline Stage | Network | Transaction Hash / State | Block Number | Measured Latency | Explorer Link |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1. Origin Swap Imbalance** | Base Sepolia (`84532`) | `0xe281025e8fbb8d4e916de88cf84ee3480a35ce1557539939dd6788b08af5dd3a` | `62595418` | `1524 ms` | [Basescan Tx ↗](https://sepolia.basescan.org/tx/0xe281025e8fbb8d4e916de88cf84ee3480a35ce1557539939dd6788b08af5dd3a) |
-| **2. ReactVM Log Ingestion** | Reactive Lasna (`5318007`) | Dispatched via system contract (RSC `0x51D8...cc16`) | `9059332` | `1109 ms` | [Reactscan RSC ↗](https://lasna.reactscan.net/address/0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16) |
-| **3. Destination JIT Settlement** | Base Sepolia (`84532`) | `0xeb6218d2db6aadd2edf67b47bed854dfcdd72f62de0f1f78ff1d3c2ff1a343c2` | `62595429` | `967 ms` | [Basescan Tx ↗](https://sepolia.basescan.org/tx/0xeb6218d2db6aadd2edf67b47bed854dfcdd72f62de0f1f78ff1d3c2ff1a343c2) |
+| **1. Origin Swap Imbalance** | Base Sepolia (`84532`) | `0x2cfb35324d238e6b527bec85e40f1caf2c782c8353ab53f9ebb694d4c9959a48` | `62598747` | `1634 ms` | [Basescan Tx ↗](https://sepolia.basescan.org/tx/0x2cfb35324d238e6b527bec85e40f1caf2c782c8353ab53f9ebb694d4c9959a48) |
+| **2. ReactVM Log Ingestion** | Reactive Lasna (`5318007`) | Dispatched via system contract (RSC `0x51D8...cc16`) | `9059944` | `983 ms` | [Reactscan RSC ↗](https://lasna.reactscan.net/address/0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16) |
+| **3. Destination JIT Settlement** | Base Sepolia (`84532`) | `0xb44aafdcd49bcc129de6e518844952a76dd3c2ee772c45b7a7798c24f73cd63e` | `62598758` | `1015 ms` | [Basescan Tx ↗](https://sepolia.basescan.org/tx/0xb44aafdcd49bcc129de6e518844952a76dd3c2ee772c45b7a7798c24f73cd63e) |
 
 **On-Chain JIT Execution Result:**
 - **Volume Protected:** `5.0 ETH`
 - **Liquidity Deployed:** `7.5 ETH` (150% coverage)
 - **Fee Captured:** `+0.015 ETH` (30 bps)
 - **Impermanent Loss Window:** `0 seconds` (atomic single-block deposit and withdrawal)
-- **Measured Roundtrip Latency:** `~3,600 ms` on live testnets (sum of measured stages: 1524 ms Origin Swap + 1109 ms ReactVM + 967 ms Destination Callback; includes public RPC submission overhead)
+- **Measured Roundtrip Latency:** `~3,632 ms` on live testnets (sum of measured stages: 1634 ms Origin Swap + 983 ms ReactVM + 1015 ms Destination Callback; includes public RPC submission overhead)
 - **Architectural Target with Flashblock Pre-Confirmations:** `< 1,500 ms` on Base Sepolia 200ms Flashblocks
 
 Reactive callbacks remove the human-in-the-loop bridging step entirely; see [`DOCS/proof-run.md`](DOCS/proof-run.md) for full transaction evidence.
@@ -77,16 +77,16 @@ Reactive callbacks remove the human-in-the-loop bridging step entirely; see [`DO
 
 ### In-Contract Execution Overhead (Hardhat Local Simulation — Supplementary)
 
-> **Important:** These figures measure smart contract EVM execution overhead in local simulation (`npx hardhat run scripts/benchmark.js`). They reflect EVM computational overhead, not live network transport latency. See [Proof-of-Life Trail](#-proof-of-life-execution-trail) above for live testnet measurements (~3,690 ms roundtrip). Reactive callbacks remove the human-in-the-loop bridging step entirely; see proof run.
+> **Important:** These figures measure smart contract EVM execution overhead in local simulation (`npx hardhat run scripts/benchmark.js`). They reflect EVM computational overhead, not live network transport latency. See [Proof-of-Life Trail](#-proof-of-life-execution-trail) above for live testnet measurements (~3,632 ms roundtrip). Reactive callbacks remove the human-in-the-loop bridging step entirely; see proof run.
 
 Measured using `contracts/scripts/benchmark.js` over 5 consecutive local EVM iterations (full report in [`DOCS/latency-benchmark.md`](DOCS/latency-benchmark.md)):
 
 | Benchmark Stage | Target Environment | Minimum | Median (p50) | p95 | Maximum |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Stage 1: Origin Detection** | Local EVM | `1.0 ms` | `2.0 ms` | `3.6 ms` | `4.0 ms` |
-| **Stage 2: ReactVM Compute** | Local EVM | `2.0 ms` | `4.0 ms` | `4.8 ms` | `5.0 ms` |
-| **Stage 3: Destination Callback** | Local EVM | `1.0 ms` | `2.0 ms` | `2.8 ms` | `3.0 ms` |
-| **Total In-Contract Overhead** | Full Local Loop | `7.0 ms` | `7.0 ms` | `8.8 ms` | `9.0 ms` |
+| **Stage 1: Origin Detection** | Local EVM | `4.0 ms` | `4.0 ms` | `5.8 ms` | `6.0 ms` |
+| **Stage 2: ReactVM Compute** | Local EVM | `3.0 ms` | `5.0 ms` | `6.0 ms` | `6.0 ms` |
+| **Stage 3: Destination Callback** | Local EVM | `3.0 ms` | `3.0 ms` | `4.8 ms` | `5.0 ms` |
+| **Total In-Contract Overhead** | Full Local Loop | `10.0 ms` | `14.0 ms` | `14.8 ms` | `15.0 ms` |
 
 ---
 

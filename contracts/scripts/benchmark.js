@@ -224,10 +224,24 @@ async function main() {
   console.log(`Total   - Min: ${stats.total.min}ms | Median: ${stats.total.median}ms | P95: ${stats.total.p95}ms | Max: ${stats.total.max}ms`);
   console.log("==============================================================\n");
 
+  // Dynamically resolve latest live testnet roundtrip from proof-run.json
+  let liveTestnetTotalMs = "~3,600 ms";
+  try {
+    const proofJsonPath = path.resolve(__dirname, "../../DOCS/proof-run.json");
+    if (fs.existsSync(proofJsonPath)) {
+      const proofJson = JSON.parse(fs.readFileSync(proofJsonPath, "utf8"));
+      if (proofJson.totalMeasuredMs) {
+        liveTestnetTotalMs = `~${proofJson.totalMeasuredMs.toLocaleString()} ms`;
+      }
+    }
+  } catch {
+    // fallback to default
+  }
+
   // Generate markdown benchmark report (In-contract execution overhead - Supplementary)
   const benchmarkMd = `# OmniSurge — In-Contract Execution Overhead (Hardhat Local Simulation — Not Network Latency)
 
-> **Important:** These figures measure smart contract **in-EVM execution time** only, isolated inside a Hardhat local simulation node. They are **not** end-to-end network latency measurements. See [\`proof-run.md\`](proof-run.md) for real testnet round-trip measurements (~3,690 ms).
+> **Important:** These figures measure smart contract **in-EVM execution time** only, isolated inside a Hardhat local simulation node. They are **not** end-to-end network latency measurements. See [\`proof-run.md\`](proof-run.md) for real testnet round-trip measurements (${liveTestnetTotalMs}).
 
 > **Track:** Low Latency DeFi (*Every Second Counts*)  
 > **Test Suite:** 5 Consecutive End-to-End Reactive Loop Iterations (Hardhat Local Simulation)  
@@ -264,7 +278,7 @@ ${iterations
 
 Reactive callbacks remove the human-in-the-loop bridging step entirely; see [\`DOCS/proof-run.md\`](proof-run.md) for live on-chain transaction evidence.
 
-- **Live Testnet Measured Roundtrip:** \`~3,690 ms\` on live testnets (includes public RPC submission overhead; see [\`DOCS/proof-run.md\`](proof-run.md)).
+- **Live Testnet Measured Roundtrip:** \`${liveTestnetTotalMs}\` on live testnets (includes public RPC submission overhead; see [\`DOCS/proof-run.md\`](proof-run.md)).
 - **Architectural Target with Flashblocks:** \`< 1,500 ms\` on Base Sepolia 200ms Flashblocks.
 
 ---

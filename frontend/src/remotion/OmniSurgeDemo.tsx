@@ -255,7 +255,7 @@ export const OmniSurgeDemo: React.FC = () => {
           <div>
             <div style={{ fontSize: "12px", color: "#8A8A8A", fontFamily: "monospace" }}>MEASURED ROUNDTRIP</div>
             <div style={{ fontSize: "20px", fontWeight: "bold", color: "#EDEDED", fontFamily: "monospace" }}>
-              ~3,690 ms
+              ~3,632 ms
             </div>
           </div>
           <div>

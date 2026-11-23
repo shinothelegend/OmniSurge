@@ -1,29 +1,29 @@
 {
-  "executionDate": "2026-11-23T13:35:54.811Z",
+  "executionDate": "2026-11-23T13:47:00.596Z",
   "deployer": "0x72D6A30f2B72d9D8bfB19241bCE6839E1BACa63B",
   "stage1": {
     "name": "Origin Swap Imbalance",
     "network": "Base Sepolia (84532)",
-    "txHash": "0xe281025e8fbb8d4e916de88cf84ee3480a35ce1557539939dd6788b08af5dd3a",
-    "blockNumber": 62595418,
-    "latencyMs": 1524
+    "txHash": "0x2cfb35324d238e6b527bec85e40f1caf2c782c8353ab53f9ebb694d4c9959a48",
+    "blockNumber": 62598747,
+    "latencyMs": 1634
   },
   "stage2": {
     "name": "ReactVM Log Processing",
     "network": "Reactive Lasna (5318007)",
     "contract": "0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16",
-    "blockNumber": 9059332,
-    "latencyMs": 1109
+    "blockNumber": 9059944,
+    "latencyMs": 983
   },
   "stage3": {
     "name": "Destination JIT Settlement",
     "network": "Base Sepolia (84532)",
-    "txHash": "0xeb6218d2db6aadd2edf67b47bed854dfcdd72f62de0f1f78ff1d3c2ff1a343c2",
-    "blockNumber": 62595429,
-    "latencyMs": 967,
+    "txHash": "0xb44aafdcd49bcc129de6e518844952a76dd3c2ee772c45b7a7798c24f73cd63e",
+    "blockNumber": 62598758,
+    "latencyMs": 1015,
     "liquidityDeployedEth": "7.5",
     "feeCapturedEth": "0.015",
     "gasUsed": "410877"
   },
-  "totalMeasuredMs": 3600
+  "totalMeasuredMs": 3632
 }

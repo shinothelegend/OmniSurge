@@ -281,8 +281,26 @@ async function main() {
 
   if (readmeTableRegex.test(readme)) {
     readme = readme.replace(readmeTableRegex, newReadmeSection);
-    fs.writeFileSync(readmePath, readme, "utf8");
-    console.log(`💾 Synchronized README.md with live testnet run metrics`);
+  }
+
+  // Synchronize benchmark intro callout in README.md as well
+  const readmeBenchmarkCalloutRegex = /(> \*\*Important:\*\* These figures measure smart contract EVM execution overhead in local simulation \(`npx hardhat run scripts\/benchmark\.js`\)\. They reflect EVM computational overhead, not live network transport latency\. See \[Proof-of-Life Trail\]\(#-proof-of-life-execution-trail\) above for live testnet measurements \()~[0-9,]+ ms roundtrip(\)\. Reactive callbacks remove the human-in-the-loop bridging step entirely; see proof run\.)/;
+  if (readmeBenchmarkCalloutRegex.test(readme)) {
+    readme = readme.replace(readmeBenchmarkCalloutRegex, `$1~${actualSumMs.toLocaleString()} ms roundtrip$2`);
+  }
+  fs.writeFileSync(readmePath, readme, "utf8");
+  console.log(`💾 Synchronized README.md with live testnet run metrics`);
+
+  // Synchronize frontend/src/remotion/OmniSurgeDemo.tsx
+  const remotionDemoPath = path.resolve(__dirname, "../../frontend/src/remotion/OmniSurgeDemo.tsx");
+  if (fs.existsSync(remotionDemoPath)) {
+    let demoCode = fs.readFileSync(remotionDemoPath, "utf8");
+    const demoTimingRegex = /(<div style=\{\{ fontSize: "12px", color: "#8A8A8A", fontFamily: "monospace" \}\}>MEASURED ROUNDTRIP<\/div>\s*<div style=\{\{ fontSize: "20px", fontWeight: "bold", color: "#EDEDED", fontFamily: "monospace" \}\}>\s*)(~[0-9,]+ ms)/;
+    if (demoTimingRegex.test(demoCode)) {
+      demoCode = demoCode.replace(demoTimingRegex, `$1~${actualSumMs.toLocaleString()} ms`);
+      fs.writeFileSync(remotionDemoPath, demoCode, "utf8");
+      console.log(`💾 Synchronized frontend/src/remotion/OmniSurgeDemo.tsx with live testnet run metrics`);
+    }
   }
 
   // Synchronize DOCS/SUBMISSION.md with the exact same run metrics
