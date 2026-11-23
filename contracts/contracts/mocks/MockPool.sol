@@ -6,7 +6,7 @@ import "../DestinationCallback.sol";
 /**
  * @title MockPool
  * @notice Simulates a Uniswap-like liquidity pool on Base Sepolia or Unichain Sepolia.
- * Emits Swap events and accepts JIT concentrated liquidity surges.
+ * Emits Swap events and accepts JIT concentrated liquidity surges with real fee transfers.
  */
 contract MockPool is IJITPool {
     string public name;
@@ -16,6 +16,7 @@ contract MockPool is IJITPool {
     uint256 public activeConcentratedLiquidity;
     uint256 public totalSwaps;
     uint256 public override feeRateBps = 30; // 0.30%
+    bool public failWithdraw; // test hook for simulating withdraw failure
 
     // Uniswap V2 standard Swap event signature:
     // Swap(address indexed sender, uint256 amount0In, uint256 amount1In, uint256 amount0Out, uint256 amount1Out, address indexed to)
@@ -36,12 +37,23 @@ contract MockPool is IJITPool {
         string memory _symbol,
         uint256 _initialReserve0,
         uint256 _initialReserve1
-    ) {
+    ) payable {
         name = _name;
         symbol = _symbol;
         reserve0 = _initialReserve0;
         reserve1 = _initialReserve1;
         activeConcentratedLiquidity = 100 ether;
+    }
+
+    /// @notice Accept native ETH so pool can pay out real LP fees
+    receive() external payable {}
+
+    function setFeeRateBps(uint256 _rate) external {
+        feeRateBps = _rate;
+    }
+
+    function setFailWithdraw(bool _fail) external {
+        failWithdraw = _fail;
     }
 
     /**
@@ -74,21 +86,42 @@ contract MockPool is IJITPool {
     /**
      * @notice Accepts JIT liquidity surge
      */
-    function surgeDeposit(uint256 amount) external override returns (bool) {
+    function surgeDeposit(uint256 amount) external payable override returns (bool) {
         activeConcentratedLiquidity += amount;
         emit LiquiditySurgeInjected(amount, block.timestamp);
         return true;
     }
 
     /**
-     * @notice Rebalances and withdraws JIT liquidity back
+     * @notice Rebalances and withdraws JIT liquidity back, transferring REAL fee to msg.sender
      */
-    function surgeWithdraw(uint256 amount) external override returns (bool) {
+    function surgeWithdraw(uint256 amount) external override returns (uint256 feePaid) {
+        require(!failWithdraw, "MockPool: simulated withdraw failure");
         if (activeConcentratedLiquidity >= amount) {
             activeConcentratedLiquidity -= amount;
         }
+        feePaid = (amount * feeRateBps) / 10000;
+        if (feePaid > 0 && address(this).balance >= feePaid) {
+            (bool sent, ) = payable(msg.sender).call{value: feePaid}("");
+            require(sent, "MockPool: fee transfer failed");
+        }
         emit LiquiditySurgeRebalanced(amount, block.timestamp);
-        return true;
+        return feePaid;
+    }
+
+    /**
+     * @notice Single atomic deposit + fee harvest + withdrawal cycle
+     */
+    function surgeCycle(uint256 amount) external payable override returns (uint256 feePaid) {
+        require(!failWithdraw, "MockPool: simulated cycle failure");
+        emit LiquiditySurgeInjected(amount, block.timestamp);
+        feePaid = (amount * feeRateBps) / 10000;
+        if (feePaid > 0 && address(this).balance >= feePaid) {
+            (bool sent, ) = payable(msg.sender).call{value: feePaid}("");
+            require(sent, "MockPool: fee transfer failed");
+        }
+        emit LiquiditySurgeRebalanced(amount, block.timestamp);
+        return feePaid;
     }
 
     function getPoolState() external view returns (
@@ -100,4 +133,3 @@ contract MockPool is IJITPool {
         return (reserve0, reserve1, activeConcentratedLiquidity, totalSwaps);
     }
 }
-

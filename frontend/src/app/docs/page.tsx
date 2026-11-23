@@ -49,18 +49,18 @@ export function DocsPage() {
                 <tbody>
                   <tr>
                     <td className="text-[#EDEDED] font-bold">STAGE 01: ORIGIN SWAP</td>
-                    <td className="text-[#8A8A8A]">Base Sepolia (Tx: 0x62084c... Block 62124403)</td>
-                    <td className="text-right text-[#EDEDED] tnum font-bold">1,607 ms</td>
+                    <td className="text-[#8A8A8A]">Base Sepolia (Tx: 0x6d04a0... Block 62572662)</td>
+                    <td className="text-right text-[#EDEDED] tnum font-bold">1,780 ms</td>
                   </tr>
                   <tr>
                     <td className="text-[#EDEDED] font-bold">STAGE 02: REACTVM</td>
                     <td className="text-[#8A8A8A]">Reactive Lasna (RSC 0x51D8... Block 61257228)</td>
-                    <td className="text-right text-[#EDEDED] tnum font-bold">612 ms</td>
+                    <td className="text-right text-[#EDEDED] tnum font-bold">637 ms</td>
                   </tr>
                   <tr>
                     <td className="text-[#EDEDED] font-bold">STAGE 03: CALLBACK</td>
-                    <td className="text-[#8A8A8A]">Base Sepolia JIT (Tx: 0xe10b5f... Block 62124411)</td>
-                    <td className="text-right text-[#EDEDED] tnum font-bold">973 ms</td>
+                    <td className="text-[#8A8A8A]">Base Sepolia JIT (Tx: 0xc59023... Block 62572671)</td>
+                    <td className="text-right text-[#EDEDED] tnum font-bold">1,053 ms</td>
                   </tr>
                   <tr className="bg-[#111111]">
                     <td className="text-[#EDEDED] font-bold">TOTAL MEASURED ROUNDTRIP</td>
@@ -105,7 +105,7 @@ export function DocsPage() {
                   </a>
                 </div>
                 <p className="font-sans text-14 text-[#8A8A8A] leading-relaxed">
-                  Deployed on Reactive Lasna (Chain ID 5318007). Subscribes via the official Omni System Contract (0x8888888888888888888888888888888888888888) to Uniswap swap topics (0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822), filters volume against the minimum imbalance threshold, pre-computes 150% concentrated liquidity coverage, and dispatches callbacks.
+                  Deployed on Reactive Lasna (Chain ID 5318007). Subscribes via the official Omni System Contract (0x8888888888888888888888888888888888888888) to Uniswap V2 Swap topics (0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822), filters volume against the minimum imbalance threshold, pre-computes 150% concentrated liquidity coverage, and dispatches callbacks.
                 </p>
               </div>
 
@@ -201,12 +201,12 @@ export function DocsPage() {
               {/* Steps */}
               <div className="space-y-4 font-mono text-12">
                 <div className="p-4 border border-[#1E1E1E] bg-[#111111] space-y-2">
-                  <span className="text-[#EDEDED] font-bold block">1. RUN COMPLETE UNIT & INVARIANT TEST SUITE (11/11 PASSING)</span>
+                  <span className="text-[#EDEDED] font-bold block">1. RUN COMPLETE UNIT & INVARIANT TEST SUITE (16/16 PASSING)</span>
                   <div className="text-[#E23B3B] bg-[#0A0A0A] p-2 border border-[#1E1E1E]">
                     cd contracts && npx hardhat test
                   </div>
                   <span className="text-[#8A8A8A] block">
-                    Executes all 11 invariant, reactive callback, replay protection, and latency estimation tests.
+                    Executes all 16 invariant, replay re-delivery, balance-delta fee accounting, unregistered pool rejection, decimal normalization, and latency estimation tests.
                   </span>
                 </div>
 

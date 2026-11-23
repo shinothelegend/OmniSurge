@@ -4,7 +4,7 @@
 
 > **Track:** Low Latency DeFi (*Every Second Counts*)  
 > **Test Suite:** 5 Consecutive End-to-End Reactive Loop Iterations (Hardhat Local Simulation)  
-> **Timestamp:** 2026-11-23T10:26:06.875Z  
+> **Timestamp:** 2026-11-23T12:15:35.087Z  
 > **Environment:** Hardhat Local Simulation with Exact Smart Contract Bytecode  
 
 ---
@@ -13,10 +13,10 @@
 
 | Metric | Stage 1 (Origin Swap Detection) | Stage 2 (ReactVM State Compute) | Stage 3 (Destination JIT Callback) | Total In-Contract Overhead |
 | :--- | :--- | :--- | :--- | :--- |
-| **Minimum** | `3 ms` | `2 ms` | `3 ms` | `8 ms` |
-| **Median (p50)** | `3 ms` | `3 ms` | `3 ms` | `10 ms` |
-| **p95** | `3.8 ms` | `4 ms` | `5.4 ms` | `11.8 ms` |
-| **Maximum** | `4 ms` | `4 ms` | `6 ms` | `12 ms` |
+| **Minimum** | `3 ms` | `3 ms` | `3 ms` | `10 ms` |
+| **Median (p50)** | `5 ms` | `4 ms` | `4 ms` | `13 ms` |
+| **p95** | `5 ms` | `6.8 ms` | `4.8 ms` | `16.6 ms` |
+| **Maximum** | `5 ms` | `7 ms` | `5 ms` | `17 ms` |
 
 ---
 
@@ -24,11 +24,11 @@
 
 | # | Stage 1 Latency (ms) | Stage 1 Block (Time) | Stage 2 Latency (ms) | Stage 3 Latency (ms) | Stage 3 Block (Time) | Total Stage (ms) | Wall Clock (ms) | Fee Captured | Gas Used |
 | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
-| **1** | `4 ms` | Block `8` (`1795429574`) | `4 ms` | `3 ms` | Block `10` (`1795429576`) | `11 ms` | `16 ms` | `+0.066 ETH` | `418082` |
-| **2** | `3 ms` | Block `11` (`1795429577`) | `4 ms` | `3 ms` | Block `13` (`1795429579`) | `10 ms` | `12 ms` | `+0.072 ETH` | `349682` |
-| **3** | `3 ms` | Block `14` (`1795429580`) | `3 ms` | `6 ms` | Block `16` (`1795429582`) | `12 ms` | `16 ms` | `+0.078 ETH` | `349682` |
-| **4** | `3 ms` | Block `17` (`1795429583`) | `3 ms` | `3 ms` | Block `19` (`1795429585`) | `9 ms` | `11 ms` | `+0.084 ETH` | `349682` |
-| **5** | `3 ms` | Block `20` (`1795429586`) | `2 ms` | `3 ms` | Block `22` (`1795429588`) | `8 ms` | `11 ms` | `+0.09 ETH` | `349682` |
+| **1** | `5 ms` | Block `8` (`1795436142`) | `6 ms` | `4 ms` | Block `10` (`1795436144`) | `15 ms` | `20 ms` | `+0.099 ETH` | `415304` |
+| **2** | `5 ms` | Block `11` (`1795436145`) | `4 ms` | `4 ms` | Block `13` (`1795436147`) | `13 ms` | `15 ms` | `+0.108 ETH` | `346904` |
+| **3** | `3 ms` | Block `14` (`1795436148`) | `4 ms` | `4 ms` | Block `16` (`1795436150`) | `11 ms` | `16 ms` | `+0.117 ETH` | `346904` |
+| **4** | `4 ms` | Block `17` (`1795436151`) | `3 ms` | `3 ms` | Block `19` (`1795436153`) | `10 ms` | `14 ms` | `+0.126 ETH` | `346904` |
+| **5** | `5 ms` | Block `20` (`1795436154`) | `7 ms` | `5 ms` | Block `22` (`1795436156`) | `17 ms` | `18 ms` | `+0.135 ETH` | `346904` |
 
 ---
 

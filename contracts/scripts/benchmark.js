@@ -49,7 +49,8 @@ async function main() {
     "Base Pool WETH/USDC",
     "bWETH-USDC",
     ethers.parseEther("1000"),
-    ethers.parseUnits("3000000", 6)
+    ethers.parseUnits("3000000", 6),
+    { value: ethers.parseEther("10.0") }
   );
 
   const DestinationCallback = await ethers.getContractFactory("DestinationCallback");
@@ -114,8 +115,8 @@ async function main() {
       blockNumber: stage1Block.number,
       opCode: 0,
       blockHash: 0,
-      txHash: 0,
-      logIndex: 0,
+      txHash: ethers.hexlify(ethers.randomBytes(32)),
+      logIndex: i,
     };
 
     const reactTx = await reactiveListener.react(logRecord);

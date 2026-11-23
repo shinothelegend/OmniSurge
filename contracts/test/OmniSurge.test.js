@@ -20,10 +20,22 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
     const MockReactiveSystem = await ethers.getContractFactory("MockReactiveSystem");
     mockSystem = await MockReactiveSystem.deploy();
 
-    // 2. Deploy Mock DEX Pools
+    // 2. Deploy Mock DEX Pools funded with ETH for real fee transfers
     const MockPool = await ethers.getContractFactory("MockPool");
-    originPoolBase = await MockPool.deploy("Base Pool WETH/USDC", "bWETH-USDC", ethers.parseEther("1000"), ethers.parseUnits("3000000", 6));
-    originPoolUnichain = await MockPool.deploy("Unichain Pool WETH/USDC", "uWETH-USDC", ethers.parseEther("1000"), ethers.parseUnits("3000000", 6));
+    originPoolBase = await MockPool.deploy(
+      "Base Pool WETH/USDC",
+      "bWETH-USDC",
+      ethers.parseEther("1000"),
+      ethers.parseUnits("3000000", 6),
+      { value: ethers.parseEther("10.0") }
+    );
+    originPoolUnichain = await MockPool.deploy(
+      "Unichain Pool WETH/USDC",
+      "uWETH-USDC",
+      ethers.parseEther("1000"),
+      ethers.parseUnits("3000000", 6),
+      { value: ethers.parseEther("10.0") }
+    );
 
     // 3. Deploy Destination Callback contract (destination is Base Sepolia)
     const DestinationCallback = await ethers.getContractFactory("DestinationCallback");
@@ -45,9 +57,21 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
     // Set authorized reactive contract on destination
     await destinationCallback.setAuthorizedReactiveContract(await reactiveListener.getAddress());
 
-    // Subscribe pools
-    await reactiveListener.subscribePool(BASE_SEPOLIA_CHAIN_ID, await originPoolBase.getAddress(), "Base Sepolia");
-    await reactiveListener.subscribePool(UNICHAIN_SEPOLIA_CHAIN_ID, await originPoolUnichain.getAddress(), "Unichain Sepolia");
+    // Subscribe pools (Base Sepolia: WETH 18, USDC 6; Unichain: WETH 18, USDC 6)
+    await reactiveListener["subscribePool(uint256,address,uint8,uint8,string)"](
+      BASE_SEPOLIA_CHAIN_ID,
+      await originPoolBase.getAddress(),
+      18,
+      6,
+      "Base Sepolia"
+    );
+    await reactiveListener["subscribePool(uint256,address,uint8,uint8,string)"](
+      UNICHAIN_SEPOLIA_CHAIN_ID,
+      await originPoolUnichain.getAddress(),
+      18,
+      6,
+      "Unichain Sepolia"
+    );
   });
 
   describe("1. Pool Subscription & Parameter Configuration", function () {
@@ -91,7 +115,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
         blockNumber: 1000,
         opCode: 0,
         blockHash: 0,
-        txHash: 0,
+        txHash: 101,
         logIndex: 0,
       };
 
@@ -118,8 +142,8 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
         blockNumber: originBlockNumber,
         opCode: 0,
         blockHash: 0,
-        txHash: 0,
-        logIndex: 0,
+        txHash: 102,
+        logIndex: 1,
       };
 
       const reactTx = await reactiveListener.react(logRecord);
@@ -155,7 +179,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
   });
 
   describe("3. Destination JIT Liquidity Execution & Latency Telemetry", function () {
-    it("should execute JIT surge, capture fees, and record sub-second latency benchmarks", async function () {
+    it("should execute JIT surge, capture real fees, and record sub-second latency benchmarks", async function () {
       const volumeIn = ethers.parseEther("10.0");
       const targetLiquidity = ethers.parseEther("15.0"); // 150%
       const originBlock = 12000;
@@ -163,7 +187,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
       const originTimestamp = latestBlock.timestamp - 1; // 1 second ago
 
       // Relayer executes callback with reactive identity injected
-      const tx = await destinationCallback.connect(relayer).triggerJITLiquidity(
+      const tx = await destinationCallback.connect(relayer)["triggerJITLiquidity(address,uint256,address,uint256,uint256,uint256,uint256,uint256)"](
         await reactiveListener.getAddress(),
         BASE_SEPOLIA_CHAIN_ID,
         await originPoolBase.getAddress(),
@@ -176,12 +200,12 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
 
       await expect(tx).to.emit(destinationCallback, "JITSurgeExecuted");
 
-      // Verify protocol metrics
+      // Verify protocol metrics: fee = targetLiquidity * 30 bps = 15 ETH * 0.30% = 0.045 ETH
+      const expectedFee = (targetLiquidity * 30n) / 10000n;
       const [totalExecs, totalVol, totalFees, avgLatency] = await destinationCallback.getProtocolMetrics();
       expect(totalExecs).to.equal(1);
       expect(totalVol).to.equal(volumeIn);
-      // Fee = 10 ETH * 30 bps = 0.03 ETH
-      expect(totalFees).to.equal(ethers.parseEther("0.03"));
+      expect(totalFees).to.equal(expectedFee);
       expect(avgLatency).to.be.gt(0);
 
       // Verify execution record
@@ -190,7 +214,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
       expect(history[0].executionId).to.equal(1);
       expect(history[0].originChainId).to.equal(BASE_SEPOLIA_CHAIN_ID);
       expect(history[0].volumeIn).to.equal(volumeIn);
-      expect(history[0].feeCaptured).to.equal(ethers.parseEther("0.03"));
+      expect(history[0].feeCaptured).to.equal(expectedFee);
       expect(history[0].latencySeconds).to.be.gte(1);
     });
 
@@ -201,7 +225,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
       const latestBlock = await ethers.provider.getBlock("latest");
       const originTimestamp = latestBlock.timestamp; // same second
 
-      await destinationCallback.connect(relayer).triggerJITLiquidity(
+      await destinationCallback.connect(relayer)["triggerJITLiquidity(address,uint256,address,uint256,uint256,uint256,uint256,uint256)"](
         await reactiveListener.getAddress(),
         UNICHAIN_SEPOLIA_CHAIN_ID,
         await originPoolUnichain.getAddress(),
@@ -224,7 +248,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
       const targetLiquidity = ethers.parseEther("15.0");
 
       await expect(
-        destinationCallback.connect(attacker).triggerJITLiquidity(
+        destinationCallback.connect(attacker)["triggerJITLiquidity(address,uint256,address,uint256,uint256,uint256,uint256,uint256)"](
           await reactiveListener.getAddress(),
           BASE_SEPOLIA_CHAIN_ID,
           await originPoolBase.getAddress(),
@@ -242,7 +266,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
       const targetLiquidity = ethers.parseEther("15.0");
 
       await expect(
-        destinationCallback.connect(relayer).triggerJITLiquidity(
+        destinationCallback.connect(relayer)["triggerJITLiquidity(address,uint256,address,uint256,uint256,uint256,uint256,uint256)"](
           attacker.address, // Spoofed reactive identity
           BASE_SEPOLIA_CHAIN_ID,
           await originPoolBase.getAddress(),
@@ -262,7 +286,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
       const originBlock = 99999;
 
       // First execution succeeds
-      await destinationCallback.connect(relayer).triggerJITLiquidity(
+      await destinationCallback.connect(relayer)["triggerJITLiquidity(address,uint256,address,uint256,uint256,uint256,uint256,uint256)"](
         await reactiveListener.getAddress(),
         BASE_SEPOLIA_CHAIN_ID,
         await originPoolBase.getAddress(),
@@ -273,9 +297,9 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
         originBlock
       );
 
-      // Second execution with identical hash must revert
+      // Second execution with identical parameters must revert
       await expect(
-        destinationCallback.connect(relayer).triggerJITLiquidity(
+        destinationCallback.connect(relayer)["triggerJITLiquidity(address,uint256,address,uint256,uint256,uint256,uint256,uint256)"](
           await reactiveListener.getAddress(),
           BASE_SEPOLIA_CHAIN_ID,
           await originPoolBase.getAddress(),
@@ -292,7 +316,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
       await destinationCallback.setPaused(true);
 
       await expect(
-        destinationCallback.connect(relayer).triggerJITLiquidity(
+        destinationCallback.connect(relayer)["triggerJITLiquidity(address,uint256,address,uint256,uint256,uint256,uint256,uint256)"](
           await reactiveListener.getAddress(),
           BASE_SEPOLIA_CHAIN_ID,
           await originPoolBase.getAddress(),
@@ -337,7 +361,7 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
         blockNumber: latestBlock.number,
         opCode: 0,
         blockHash: 0,
-        txHash: 0,
+        txHash: 201,
         logIndex: 0,
       };
 
@@ -374,11 +398,188 @@ describe("OmniSurge JIT Flash Liquidity Protocol", function () {
       expect(jitEvent).to.not.be.undefined;
       const parsedJit = destinationCallback.interface.parseLog(jitEvent);
 
+      const targetLiq = (swapAmount * 15000n) / 10000n;
+      const expectedFee = (targetLiq * 30n) / 10000n; // 0.1125 ETH real fee
       expect(parsedJit.args.originChainId).to.equal(BASE_SEPOLIA_CHAIN_ID);
-      expect(parsedJit.args.liquidityDeployed).to.equal((swapAmount * 15000n) / 10000n);
-      expect(parsedJit.args.feeCaptured).to.equal((swapAmount * 30n) / 10000n); // 0.075 ETH
+      expect(parsedJit.args.liquidityDeployed).to.equal(targetLiq);
+      expect(parsedJit.args.feeCaptured).to.equal(expectedFee);
 
-      console.log(`\n    ⚡ End-to-End Latency: ${parsedJit.args.latencyMsEstimated} ms | Fees Captured: ${ethers.formatEther(parsedJit.args.feeCaptured)} ETH | Gas: ${parsedJit.args.gasUsed}\n`);
+      console.log(`\n    ⚡ End-to-End Latency: ${parsedJit.args.latencyMsEstimated} ms | Real Fees Captured: ${ethers.formatEther(parsedJit.args.feeCaptured)} ETH | Gas: ${parsedJit.args.gasUsed}\n`);
+    });
+  });
+
+  describe("6. External Audit Hardening Suite (4 Vulnerability Fixes)", function () {
+    it("[AUDIT FIX 1] REPLAY DEDUP: prevents surge duplicate when same origin LogRecord is redelivered with different timestamps", async function () {
+      const swapAmount = ethers.parseEther("10.0");
+      const swapData = ethers.AbiCoder.defaultAbiCoder().encode(
+        ["uint256", "uint256", "uint256", "uint256"],
+        [swapAmount, 0, 0, ethers.parseUnits("30000", 6)]
+      );
+
+      const identicalLogRecord = {
+        chainId: BASE_SEPOLIA_CHAIN_ID,
+        contractAddress: await originPoolBase.getAddress(),
+        topic0: UNISWAP_V2_SWAP_TOPIC,
+        topic1: 0,
+        topic2: 0,
+        topic3: 0,
+        data: swapData,
+        blockNumber: 62000,
+        opCode: 0,
+        blockHash: 0,
+        txHash: 999999, // Unique origin tx identity
+        logIndex: 4,
+      };
+
+      // Delivery 1: Dispatches callback
+      const tx1 = await reactiveListener.react(identicalLogRecord);
+      await expect(tx1).to.emit(reactiveListener, "SurgeDispatched");
+
+      // Delivery 2: Exact same LogRecord redelivered later (different Lasna time) -> Dropped by RSC
+      const tx2 = await reactiveListener.react(identicalLogRecord);
+      await expect(tx2).to.not.emit(reactiveListener, "SurgeDispatched");
+      expect(await reactiveListener.totalSurgesDispatched()).to.equal(1);
+
+      // Even if redelivered callback reached DestinationCallback directly, dedup on (chainId, pool, txHash, logIndex) blocks it
+      const targetLiq = ethers.parseEther("15.0");
+      // Execution 1 succeeds
+      await destinationCallback.connect(relayer)["triggerJITLiquidity(address,uint256,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256)"](
+        await reactiveListener.getAddress(),
+        BASE_SEPOLIA_CHAIN_ID,
+        await originPoolBase.getAddress(),
+        swapAmount,
+        0,
+        targetLiq,
+        1700000000, // Initial timestamp
+        62000,
+        999999,
+        4
+      );
+
+      // Execution 2 with DIFFERENT timestamp (relayer retry at different time) -> MUST REVERT
+      await expect(
+        destinationCallback.connect(relayer)["triggerJITLiquidity(address,uint256,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256)"](
+          await reactiveListener.getAddress(),
+          BASE_SEPOLIA_CHAIN_ID,
+          await originPoolBase.getAddress(),
+          swapAmount,
+          0,
+          targetLiq,
+          1700009999, // Different Lasna timestamp!
+          62000,
+          999999,
+          4
+        )
+      ).to.be.revertedWith("OmniSurgeCallback: replay prevented");
+
+      const [totalExecs] = await destinationCallback.getProtocolMetrics();
+      expect(totalExecs).to.equal(1); // Exactly ONE execution recorded
+    });
+
+    it("[AUDIT FIX 2] REAL FEE ACCOUNTING: feeCaptured strictly reflects balance delta from pool transfer, not phantom formula", async function () {
+      const volumeIn = ethers.parseEther("5.0");
+      const targetLiq = ethers.parseEther("7.5");
+      const balBefore = await ethers.provider.getBalance(await destinationCallback.getAddress());
+
+      const tx = await destinationCallback.connect(relayer)["triggerJITLiquidity(address,uint256,address,uint256,uint256,uint256,uint256,uint256)"](
+        await reactiveListener.getAddress(),
+        BASE_SEPOLIA_CHAIN_ID,
+        await originPoolBase.getAddress(),
+        volumeIn,
+        0,
+        targetLiq,
+        1700000010,
+        62005
+      );
+      await tx.wait();
+
+      const balAfter = await ethers.provider.getBalance(await destinationCallback.getAddress());
+      const actualReceived = balAfter - balBefore;
+
+      const history = await destinationCallback.getLatestExecutions(1);
+      expect(history[0].feeCaptured).to.equal(actualReceived);
+      expect(actualReceived).to.be.gt(0);
+
+      const [, , totalFeesCaptured] = await destinationCallback.getProtocolMetrics();
+      expect(totalFeesCaptured).to.equal(actualReceived);
+    });
+
+    it("[AUDIT FIX 3A] UNREGISTERED POOL: reverts immediately and preserves zero execution counters", async function () {
+      const unregisteredPool = trader.address;
+      const initialExecs = (await destinationCallback.getProtocolMetrics())[0];
+
+      await expect(
+        destinationCallback.connect(relayer)["triggerJITLiquidity(address,uint256,address,uint256,uint256,uint256,uint256,uint256)"](
+          await reactiveListener.getAddress(),
+          BASE_SEPOLIA_CHAIN_ID,
+          unregisteredPool,
+          ethers.parseEther("1.0"),
+          0,
+          ethers.parseEther("1.5"),
+          1700000020,
+          62010
+        )
+      ).to.be.revertedWith("OmniSurgeCallback: pool not registered");
+
+      const finalExecs = (await destinationCallback.getProtocolMetrics())[0];
+      expect(finalExecs).to.equal(initialExecs); // Counters completely untouched
+    });
+
+    it("[AUDIT FIX 3B] WITHDRAW FAILURE & RESCUE: emits JITWithdrawFailed and allows owner to rescue funds", async function () {
+      // Deploy separate pool with failing withdraw
+      const MockPool = await ethers.getContractFactory("MockPool");
+      const faultyPool = await MockPool.deploy("Faulty Pool", "fPOOL", ethers.parseEther("100"), ethers.parseUnits("300000", 6), { value: ethers.parseEther("1.0") });
+      await destinationCallback.setPoolRegistration(await faultyPool.getAddress(), true);
+
+      // Trigger withdraw failure hook on faulty pool
+      await faultyPool.setFailWithdraw(true);
+
+      const tx = await destinationCallback.connect(relayer)["triggerJITLiquidity(address,uint256,address,uint256,uint256,uint256,uint256,uint256)"](
+        await reactiveListener.getAddress(),
+        BASE_SEPOLIA_CHAIN_ID,
+        await faultyPool.getAddress(),
+        ethers.parseEther("2.0"),
+        0,
+        ethers.parseEther("3.0"),
+        1700000030,
+        62015
+      );
+      await expect(tx).to.emit(destinationCallback, "JITWithdrawFailed");
+
+      // Verify rescueFunds works for owner
+      await owner.sendTransaction({ to: await destinationCallback.getAddress(), value: ethers.parseEther("1.0") });
+      const recipientBalBefore = await ethers.provider.getBalance(trader.address);
+      await destinationCallback.connect(owner).rescueFunds(ethers.ZeroAddress, trader.address, ethers.parseEther("0.5"));
+      const recipientBalAfter = await ethers.provider.getBalance(trader.address);
+      expect(recipientBalAfter - recipientBalBefore).to.equal(ethers.parseEther("0.5"));
+    });
+
+    it("[AUDIT FIX 4] DECIMAL NORMALIZATION: normalizes 6-decimal USDC swaps against 18-decimal threshold fairly", async function () {
+      // 1,000 USDC swap: raw volume = 1000 * 10^6 (which is only 10^9 wei, far below 1.0 ETH = 10^18)
+      // With decimal normalization (USDC 6 -> normalized to 18 decimals = 1,000 * 10^18), it exceeds the 1.0 ETH threshold!
+      const usdcSwapAmount = ethers.parseUnits("1000", 6);
+      const usdcSwapData = ethers.AbiCoder.defaultAbiCoder().encode(
+        ["uint256", "uint256", "uint256", "uint256"],
+        [0, usdcSwapAmount, ethers.parseEther("0.33"), 0] // token1 is USDC
+      );
+
+      const logRecord = {
+        chainId: BASE_SEPOLIA_CHAIN_ID,
+        contractAddress: await originPoolBase.getAddress(),
+        topic0: UNISWAP_V2_SWAP_TOPIC,
+        topic1: 0,
+        topic2: 0,
+        topic3: 0,
+        data: usdcSwapData,
+        blockNumber: 62020,
+        opCode: 0,
+        blockHash: 0,
+        txHash: 88888,
+        logIndex: 2,
+      };
+
+      const reactTx = await reactiveListener.react(logRecord);
+      await expect(reactTx).to.emit(reactiveListener, "SurgeDispatched");
     });
   });
 });

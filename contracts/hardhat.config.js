@@ -15,7 +15,7 @@ const config = {
         enabled: true,
         runs: 200,
       },
-      viaIR: false,
+      viaIR: true,
     },
   },
   networks: {

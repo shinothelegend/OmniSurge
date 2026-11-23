@@ -73,7 +73,7 @@ contract MockReactiveSystem is ISystemContract {
 
     /**
      * @notice Mimics the Omni system contract's callback request.
-     * @dev Replaces the first 32-byte word of the payload with msg.sender,
+     * @dev Replaces the first 32-byte word of the payload with caller(),
      *      matching the real network's sender-authentication injection.
      */
     function requestCallbackV_1_0(
@@ -99,7 +99,7 @@ contract MockReactiveSystem is ISystemContract {
     }
 
     /**
-     * @notice Simulates the ReactVM receiving an origin log and passing it into react()
+     * @notice Simulates the ReactVM receiving an origin log with full tx identity and passing it into react()
      */
     function simulateReactVMDispatch(
         address reactiveContract,
@@ -109,8 +109,10 @@ contract MockReactiveSystem is ISystemContract {
         uint256 amount1In,
         uint256 amount0Out,
         uint256 amount1Out,
-        uint256 blockNumber
-    ) external {
+        uint256 blockNumber,
+        uint256 txHash,
+        uint256 logIndex
+    ) public {
         uint256 swapTopic0 = 0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822;
         bytes memory data = abi.encode(amount0In, amount1In, amount0Out, amount1Out);
 
@@ -125,11 +127,34 @@ contract MockReactiveSystem is ISystemContract {
             blockNumber: blockNumber,
             opCode: 0,
             blockHash: 0,
-            txHash: 0,
-            logIndex: 0
+            txHash: txHash,
+            logIndex: logIndex
         });
 
         IReactive(reactiveContract).react(log);
     }
-}
 
+    function simulateReactVMDispatch(
+        address reactiveContract,
+        uint256 chainId,
+        address originPool,
+        uint256 amount0In,
+        uint256 amount1In,
+        uint256 amount0Out,
+        uint256 amount1Out,
+        uint256 blockNumber
+    ) external {
+        simulateReactVMDispatch(
+            reactiveContract,
+            chainId,
+            originPool,
+            amount0In,
+            amount1In,
+            amount0Out,
+            amount1Out,
+            blockNumber,
+            0,
+            0
+        );
+    }
+}

@@ -82,10 +82,10 @@ Measured using `contracts/scripts/benchmark.js` over 5 consecutive local EVM ite
 
 | Benchmark Stage | Target Environment | Minimum | Median (p50) | p95 | Maximum |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Stage 1: Origin Detection** | Local EVM | `2.0 ms` | `3.0 ms` | `3.0 ms` | `3.0 ms` |
-| **Stage 2: ReactVM Compute** | Local EVM | `2.0 ms` | `2.0 ms` | `2.0 ms` | `2.0 ms` |
-| **Stage 3: Destination Callback** | Local EVM | `2.0 ms` | `2.0 ms` | `2.8 ms` | `3.0 ms` |
-| **Total In-Contract Overhead** | Full Local Loop | `6.0 ms` | `7.0 ms` | `7.8 ms` | `8.0 ms` |
+| **Stage 1: Origin Detection** | Local EVM | `3.0 ms` | `5.0 ms` | `5.0 ms` | `5.0 ms` |
+| **Stage 2: ReactVM Compute** | Local EVM | `3.0 ms` | `4.0 ms` | `6.8 ms` | `7.0 ms` |
+| **Stage 3: Destination Callback** | Local EVM | `3.0 ms` | `4.0 ms` | `4.8 ms` | `5.0 ms` |
+| **Total In-Contract Overhead** | Full Local Loop | `10.0 ms` | `13.0 ms` | `16.6 ms` | `17.0 ms` |
 
 ---
 
@@ -95,8 +95,8 @@ All smart contracts are written in Solidity `^0.8.24` and compiled using Hardhat
 
 1. **`OmniSurgeReactive.sol` (RSC)**:
    - Deployed on **Reactive Lasna Testnet** (Chain ID: `5318007`).
-   - Subscribes to Uniswap swap topics (`0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822`) via the official Reactive System Contract (`0x8888888888888888888888888888888888888888`).
-   - Filters volume against `minImbalanceThreshold` (default `0.1 ETH`).
+   - Subscribes to Uniswap V2 Swap topics (`0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822`) via the official Reactive System Contract (`0x8888888888888888888888888888888888888888`).
+   - Decimal-normalized volume filtering against `minImbalanceThreshold` (converts 6-decimal USDC to 18-decimal base for fair evaluation).
    - Computes target concentrated liquidity injection (`volumeIn * 150%`).
    - Emits standard Reactive `Callback(chain_id, destinationCallback, gasLimit, payload)`.
 
@@ -104,8 +104,8 @@ All smart contracts are written in Solidity `^0.8.24` and compiled using Hardhat
    - Deployed on destination chains (Base Sepolia and Unichain Sepolia).
    - Authorized relayer & RSC caller cryptographic verification.
    - `nonReentrant` mutex protection.
-   - Deterministic keccak256 hash deduplication preventing replay attacks.
-   - Atomic JIT liquidity deposit, fee harvesting (30 bps default), and immediate retraction.
+   - Immutable origin event identity deduplication: `keccak256(originChainId, originPool, originTxHash, originLogIndex)` eliminates duplicate executions even under at-least-once delivery retries.
+   - Atomic `surgeCycle` with measured balance-delta fee accounting (no phantom formulas) and owner fund rescue circuit.
    - Telemetry ring buffer storing latency milliseconds, blocks, and fees.
 
 3. **`MockPool.sol`**:
@@ -121,11 +121,12 @@ OmniSurge includes an automated invariant test suite (`contracts/scripts/securit
 | :--- | :--- | :--- | :--- |
 | **Unauthorized Callback Access** | `DestinationCallback.sol` | **PASSED** | Only authorized callback relayer or contract owner can invoke |
 | **Unauthorized Reactive Sender** | `DestinationCallback.sol` | **PASSED** | Validates `reactiveSender == authorizedReactiveContract` |
-| **Replay Attack Resistance** | `DestinationCallback.sol` | **PASSED** | Deterministic keccak256 hash ring buffer deduplication |
+| **Replay Attack Resistance** | `DestinationCallback.sol` | **PASSED** | Immutable origin event identity deduplication `(originChainId, originPool, originTxHash, originLogIndex)` blocks re-delivery |
 | **Reentrancy Resistance** | `DestinationCallback.sol` | **PASSED** | `nonReentrant` status mutex (1 -> 2 -> 1) |
 | **Emergency Halt** | `DestinationCallback.sol` | **PASSED** | Owner pause circuit breaker halts all operations |
+| **Unregistered Pool Isolation** | `DestinationCallback.sol` | **PASSED** | Reverted unregistered pool call with zero state or counter inflation |
 
-**Self-Implemented Invariant Test Score: 5 / 5 Vectors Passing, 11 / 11 Unit & Integration Tests Passing** (see raw test output in [`DOCS/test-results.txt`](DOCS/test-results.txt)).
+**Self-Implemented Invariant Test Score: 6 / 6 Vectors Passing, 16 / 16 Unit & Integration Tests Passing (100%)** (see raw test output in [`DOCS/test-results.txt`](DOCS/test-results.txt)).
 
 ---
 

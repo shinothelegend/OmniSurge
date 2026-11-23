@@ -27,9 +27,9 @@ Verified on live testnets with `contracts/scripts/demo-loop.js` (see [`DOCS/proo
 
 | Pipeline Stage | Target Network | Transaction Hash | Block | Latency | Explorer Link |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1. Origin Swap Imbalance** | Base Sepolia (`84532`) | `0x62084cbecacdf182fa13d91ea38ca1c2a1178de21b13c1fed47252f2eb9673ef` | `62124403` | `1,607 ms` | [Basescan ↗](https://sepolia.basescan.org/tx/0x62084cbecacdf182fa13d91ea38ca1c2a1178de21b13c1fed47252f2eb9673ef) |
-| **2. ReactVM Log Processing** | Reactive Lasna (`5318007`) | State Verified on RSC | `61257228` | `612 ms` | [Reactscan ↗](https://lasna.reactscan.net/address/0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16) |
-| **3. Destination JIT Callback** | Base Sepolia (`84532`) | `0xe10b5fddc33dcc59458bff8f88dbffd5d4be389331eba9919c6ed52a9b9c0215` | `62124411` | `973 ms` | [Basescan ↗](https://sepolia.basescan.org/tx/0xe10b5fddc33dcc59458bff8f88dbffd5d4be389331eba9919c6ed52a9b9c0215) |
+| **1. Origin Swap Imbalance** | Base Sepolia (`84532`) | `0x6d04a076a1b66821fd759af95b8035e572f6ddb292f4b9efd4c35cbc4a915ec9` | `62572662` | `1,780 ms` | [Basescan ↗](https://sepolia.basescan.org/tx/0x6d04a076a1b66821fd759af95b8035e572f6ddb292f4b9efd4c35cbc4a915ec9) |
+| **2. ReactVM Log Processing** | Reactive Lasna (`5318007`) | State Verified on RSC | `61257228` | `637 ms` | [Reactscan ↗](https://lasna.reactscan.net/address/0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16) |
+| **3. Destination JIT Callback** | Base Sepolia (`84532`) | `0xc590233f389994ab653f36fa1ad9abab38769e51e74b9b0dd92396bce7c732d4` | `62572671` | `1,053 ms` | [Basescan ↗](https://sepolia.basescan.org/tx/0xc590233f389994ab653f36fa1ad9abab38769e51e74b9b0dd92396bce7c732d4) |
 
 **Total Measured Latency:** `~2,000 ms` roundtrip on live testnets (includes public RPC polling overhead). Sub-1.5s is the architectural target on Base Flashblocks. Reactive callbacks remove the human-in-the-loop bridging step entirely; see [`DOCS/proof-run.md`](proof-run.md).
 
@@ -41,16 +41,16 @@ Measured with `contracts/scripts/benchmark.js` over 5 local EVM runs (see [`DOCS
 
 | Metric | Origin Swap Detection | ReactVM Compute | Destination JIT Callback | Total In-Contract Overhead |
 | :--- | :--- | :--- | :--- | :--- |
-| **Minimum** | `2.0 ms` | `2.0 ms` | `2.0 ms` | `6.0 ms` |
-| **Median (p50)** | `3.0 ms` | `2.0 ms` | `2.0 ms` | `7.0 ms` |
-| **p95** | `3.0 ms` | `2.0 ms` | `2.8 ms` | `7.8 ms` |
-| **Maximum** | `3.0 ms` | `2.0 ms` | `3.0 ms` | `8.0 ms` |
+| **Minimum** | `3.0 ms` | `3.0 ms` | `3.0 ms` | `10.0 ms` |
+| **Median (p50)** | `5.0 ms` | `4.0 ms` | `4.0 ms` | `13.0 ms` |
+| **p95** | `5.0 ms` | `6.8 ms` | `4.8 ms` | `16.6 ms` |
+| **Maximum** | `5.0 ms` | `7.0 ms` | `5.0 ms` | `17.0 ms` |
 
 ---
 
 ## 🛡️ Invariant Test Suite & Verification Results
-- **Unit & Integration Suite:** **11 / 11 tests passing (100%)** (see [`DOCS/test-results.txt`](test-results.txt))
-- **Internal Security Review:** **5 / 5 invariant vectors verified** (replay deduplication, `nonReentrant` mutex, authorized relayer verification, pause breaker)
+- **Unit & Integration Suite:** **16 / 16 tests passing (100%)** (see [`DOCS/test-results.txt`](test-results.txt))
+- **Internal Security Review:** **6 / 6 invariant vectors verified** (replay deduplication under at-least-once re-delivery, `nonReentrant` mutex, authorized relayer verification, pause breaker, unregistered pool isolation, balance-delta fee accounting)
 
 ---
 
@@ -62,7 +62,7 @@ git clone https://github.com/shinothelegend/OmniSurge.git
 cd OmniSurge/contracts
 npm install
 
-# 2. Run complete test suite (11/11 passing)
+# 2. Run complete test suite (16/16 passing)
 npx hardhat test
 
 # 3. Run 5-iteration latency benchmark

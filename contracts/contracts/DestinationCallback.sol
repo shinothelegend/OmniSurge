@@ -4,8 +4,9 @@ pragma solidity >=0.8.0;
 import "./abstract-base/AbstractCallback.sol";
 
 interface IJITPool {
-    function surgeDeposit(uint256 amount) external returns (bool);
-    function surgeWithdraw(uint256 amount) external returns (bool);
+    function surgeDeposit(uint256 amount) external payable returns (bool);
+    function surgeWithdraw(uint256 amount) external returns (uint256 feePaid);
+    function surgeCycle(uint256 amount) external payable returns (uint256 feePaid);
     function feeRateBps() external view returns (uint256);
 }
 
@@ -29,6 +30,21 @@ contract DestinationCallback is AbstractCallback {
         uint256 latencySeconds;
         uint256 latencyMsEstimated;
         uint256 gasUsed;
+        uint256 originTxHash;
+        uint256 originLogIndex;
+    }
+
+    struct JITParams {
+        address reactiveSender;
+        uint256 originChainId;
+        address originPool;
+        uint256 amount0In;
+        uint256 amount1In;
+        uint256 targetLiquidity;
+        uint256 originTimestamp;
+        uint256 originBlock;
+        uint256 originTxHash;
+        uint256 originLogIndex;
     }
 
     uint256 public executionCounter;
@@ -59,13 +75,16 @@ contract DestinationCallback is AbstractCallback {
 
     event PoolRegistered(address indexed pool, bool isRegistered);
     event FeeRateUpdated(uint256 oldRate, uint256 newRate);
+    event JITWithdrawFailed(uint256 indexed executionId, address indexed pool, uint256 amount);
+    event JITDepositFailed(uint256 indexed executionId, address indexed pool, uint256 amount);
+    event FundsRescued(address indexed token, address indexed to, uint256 amount);
 
     constructor(
         address _callbackRelayer,
         address _authorizedReactiveContract
     ) AbstractCallback(_callbackRelayer, _authorizedReactiveContract) {}
 
-    /// @notice Accept native funds to cover callback gas billed by Reactive Network.
+    /// @notice Accept native funds to cover callback gas billed by Reactive Network or pool fee payouts.
     receive() external payable {}
 
     /**
@@ -87,7 +106,38 @@ contract DestinationCallback is AbstractCallback {
     }
 
     /**
-     * @notice Main callback entry point triggered by Reactive Network relayer
+     * @notice Full 10-argument callback with immutable origin tx identity
+     */
+    function triggerJITLiquidity(
+        address reactiveSender,
+        uint256 originChainId,
+        address originPool,
+        uint256 amount0In,
+        uint256 amount1In,
+        uint256 targetLiquidity,
+        uint256 originTimestamp,
+        uint256 originBlock,
+        uint256 originTxHash,
+        uint256 originLogIndex
+    ) external onlyAuthorized nonReentrant whenNotPaused returns (uint256 feeCaptured) {
+        return _executeJIT(
+            JITParams({
+                reactiveSender: reactiveSender,
+                originChainId: originChainId,
+                originPool: originPool,
+                amount0In: amount0In,
+                amount1In: amount1In,
+                targetLiquidity: targetLiquidity,
+                originTimestamp: originTimestamp,
+                originBlock: originBlock,
+                originTxHash: originTxHash,
+                originLogIndex: originLogIndex
+            })
+        );
+    }
+
+    /**
+     * @notice Backward-compatible 8-argument callback
      */
     function triggerJITLiquidity(
         address reactiveSender,
@@ -99,74 +149,137 @@ contract DestinationCallback is AbstractCallback {
         uint256 originTimestamp,
         uint256 originBlock
     ) external onlyAuthorized nonReentrant whenNotPaused returns (uint256 feeCaptured) {
+        return _executeJIT(
+            JITParams({
+                reactiveSender: reactiveSender,
+                originChainId: originChainId,
+                originPool: originPool,
+                amount0In: amount0In,
+                amount1In: amount1In,
+                targetLiquidity: targetLiquidity,
+                originTimestamp: originTimestamp,
+                originBlock: originBlock,
+                originTxHash: 0,
+                originLogIndex: 0
+            })
+        );
+    }
+
+    /**
+     * @notice Backward-compatible 7-argument callback without reactiveSender parameter
+     */
+    function triggerJITLiquidity(
+        uint256 originChainId,
+        address originPool,
+        uint256 amount0In,
+        uint256 amount1In,
+        uint256 targetLiquidity,
+        uint256 originTimestamp,
+        uint256 originBlock
+    ) external onlyAuthorized nonReentrant whenNotPaused returns (uint256 feeCaptured) {
+        return _executeJIT(
+            JITParams({
+                reactiveSender: authorizedReactiveContract,
+                originChainId: originChainId,
+                originPool: originPool,
+                amount0In: amount0In,
+                amount1In: amount1In,
+                targetLiquidity: targetLiquidity,
+                originTimestamp: originTimestamp,
+                originBlock: originBlock,
+                originTxHash: 0,
+                originLogIndex: 0
+            })
+        );
+    }
+
+    /**
+     * @dev Internal shared JIT execution implementation using memory struct to prevent stack-too-deep
+     */
+    function _executeJIT(JITParams memory p) internal returns (uint256 feeCaptured) {
         require(
-            reactiveSender == authorizedReactiveContract,
+            p.reactiveSender == authorizedReactiveContract,
             "OmniSurgeCallback: unauthorized reactive"
         );
+        // [FIX 3A] Reject unregistered pools immediately with zero state change
+        require(registeredPools[p.originPool], "OmniSurgeCallback: pool not registered");
+
         uint256 startGas = gasleft();
 
-        // 1. Replay prevention
-        bytes32 executionHash = keccak256(
-            abi.encodePacked(originChainId, originPool, originBlock, amount0In, amount1In, originTimestamp)
-        );
+        // [FIX 1] Replay prevention keyed on immutable origin event identity.
+        // Excludes originTimestamp so at-least-once delivery with differing Lasna timestamps is safely blocked.
+        bytes32 executionHash = (p.originTxHash != 0 || p.originLogIndex != 0)
+            ? keccak256(abi.encodePacked(p.originChainId, p.originPool, p.originTxHash, p.originLogIndex))
+            : keccak256(abi.encodePacked(p.originChainId, p.originPool, p.originBlock, p.amount0In, p.amount1In));
         require(!executedHashes[executionHash], "OmniSurgeCallback: replay prevented");
         executedHashes[executionHash] = true;
 
-        // 2. Latency calculation
-        uint256 latencySeconds = block.timestamp >= originTimestamp ? (block.timestamp - originTimestamp) : 0;
+        // Latency calculation
+        uint256 latencySeconds = block.timestamp >= p.originTimestamp ? (block.timestamp - p.originTimestamp) : 0;
         uint256 latencyMsEstimated = latencySeconds * 1000;
         if (latencyMsEstimated == 0) {
-            uint256 blockDelta = block.number >= originBlock ? (block.number - originBlock) : 1;
-            latencyMsEstimated = blockDelta * (originChainId == 84532 ? 200 : 1000);
+            uint256 blockDelta = block.number >= p.originBlock ? (block.number - p.originBlock) : 1;
+            latencyMsEstimated = blockDelta * (p.originChainId == 84532 ? 200 : 1000);
         }
 
-        uint256 volumeIn = amount0In > amount1In ? amount0In : amount1In;
+        uint256 volumeIn = p.amount0In > p.amount1In ? p.amount0In : p.amount1In;
 
-        // 3. Concentrated liquidity injection & instant rebalance
-        uint256 feeRate = defaultFeeRateBps;
-        if (registeredPools[originPool]) {
-            try IJITPool(originPool).feeRateBps() returns (uint256 rate) {
-                if (rate > 0) feeRate = rate;
-            } catch {}
+        // [FIX 2] Real fee measurement: measure actual balance delta before & after cycle.
+        uint256 balBefore = address(this).balance;
 
-            try IJITPool(originPool).surgeDeposit(targetLiquidity) returns (bool success) {
-                if (success) {
-                    IJITPool(originPool).surgeWithdraw(targetLiquidity);
+        // [FIX 3B] Prefer atomic surgeCycle if supported, otherwise two-step with failure detection
+        try IJITPool(p.originPool).surgeCycle(p.targetLiquidity) returns (uint256) {
+            // cycle executed
+        } catch {
+            try IJITPool(p.originPool).surgeDeposit(p.targetLiquidity) returns (bool depSuccess) {
+                if (depSuccess) {
+                    try IJITPool(p.originPool).surgeWithdraw(p.targetLiquidity) returns (uint256) {
+                        // withdrawn
+                    } catch {
+                        emit JITWithdrawFailed(executionCounter + 1, p.originPool, p.targetLiquidity);
+                    }
+                } else {
+                    emit JITDepositFailed(executionCounter + 1, p.originPool, p.targetLiquidity);
                 }
-            } catch {}
+            } catch {
+                emit JITDepositFailed(executionCounter + 1, p.originPool, p.targetLiquidity);
+            }
         }
 
-        feeCaptured = (volumeIn * feeRate) / 10000;
+        // Real fee captured is strictly the actual received balance delta (no phantom formula substitution)
+        feeCaptured = address(this).balance > balBefore ? (address(this).balance - balBefore) : 0;
 
-        // 4. Update protocol state
+        // Update protocol state
         executionCounter++;
         totalVolumeProtected += volumeIn;
         totalFeesCaptured += feeCaptured;
         totalLatencyMsSum += latencyMsEstimated;
 
-        // 5. Store record directly into storage to avoid stack overflow
+        // Store execution record
         JITExecution storage record = executions[executionCounter];
         record.executionId = executionCounter;
-        record.originChainId = originChainId;
-        record.originPool = originPool;
+        record.originChainId = p.originChainId;
+        record.originPool = p.originPool;
         record.volumeIn = volumeIn;
-        record.liquidityDeployed = targetLiquidity;
+        record.liquidityDeployed = p.targetLiquidity;
         record.feeCaptured = feeCaptured;
-        record.originTimestamp = originTimestamp;
-        record.originBlock = originBlock;
+        record.originTimestamp = p.originTimestamp;
+        record.originBlock = p.originBlock;
         record.destinationTimestamp = block.timestamp;
         record.destinationBlock = block.number;
         record.latencySeconds = latencySeconds;
         record.latencyMsEstimated = latencyMsEstimated;
         record.gasUsed = startGas - gasleft() + 21000;
+        record.originTxHash = p.originTxHash;
+        record.originLogIndex = p.originLogIndex;
 
         executionHistory.push(executionCounter);
 
         emit JITSurgeExecuted(
             executionCounter,
-            originChainId,
-            originPool,
-            targetLiquidity,
+            p.originChainId,
+            p.originPool,
+            p.targetLiquidity,
             feeCaptured,
             latencySeconds,
             latencyMsEstimated,
@@ -213,5 +326,22 @@ contract DestinationCallback is AbstractCallback {
             avgLatency
         );
     }
-}
 
+    /**
+     * @notice [FIX 3B] Rescue stuck native ETH or ERC20 liquidity from destination contract
+     */
+    function rescueFunds(address token, address payable to, uint256 amount) external onlyOwner {
+        require(to != address(0), "OmniSurgeCallback: zero address");
+        if (token == address(0)) {
+            require(address(this).balance >= amount, "OmniSurgeCallback: insufficient balance");
+            (bool success, ) = to.call{value: amount}("");
+            require(success, "OmniSurgeCallback: transfer failed");
+        } else {
+            (bool success, bytes memory data) = token.call(
+                abi.encodeWithSignature("transfer(address,uint256)", to, amount)
+            );
+            require(success && (data.length == 0 || abi.decode(data, (bool))), "OmniSurgeCallback: ERC20 transfer failed");
+        }
+        emit FundsRescued(token, to, amount);
+    }
+}

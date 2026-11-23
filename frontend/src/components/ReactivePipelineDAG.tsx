@@ -132,7 +132,7 @@ export function ReactivePipelineDAG() {
       num: "03",
       name: "CONCENTRATED INJECTION",
       sub: "Destination Flash Callback",
-      desc: "Supplies concentrated depth directly into Uniswap v3/v4 pools for execution block.",
+      desc: "Supplies concentrated depth directly into Uniswap V2 / v2-style concentrated flash pools for execution block.",
     },
     {
       num: "04",

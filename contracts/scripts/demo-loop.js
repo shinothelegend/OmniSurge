@@ -190,7 +190,7 @@ async function main() {
 
 ## 📈 On-Chain Settlement Metrics
 
-- **Swap Volume In:** \`5.0 ETH\` ($15,000 USD equivalent)
+- **Swap Volume In:** \`5.0 ETH\`
 - **JIT Liquidity Injected:** \`${deployedEth} ETH\` (150% volume coverage)
 - **LP Fee Harvested:** \`+${feeCapturedEth} ETH\` (30 bps capture)
 - **Impermanent Loss Window:** \`0 s\` (atomic single-block deposit and withdrawal removes price exposure during the JIT window)
