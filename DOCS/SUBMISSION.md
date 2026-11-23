@@ -27,11 +27,11 @@ Verified on live testnets with `contracts/scripts/demo-loop.js` (see [`DOCS/proo
 
 | Pipeline Stage | Target Network | Transaction Hash | Block | Latency | Explorer Link |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1. Origin Swap Imbalance** | Base Sepolia (`84532`) | `0x6d04a076a1b66821fd759af95b8035e572f6ddb292f4b9efd4c35cbc4a915ec9` | `62572662` | `1,780 ms` | [Basescan ↗](https://sepolia.basescan.org/tx/0x6d04a076a1b66821fd759af95b8035e572f6ddb292f4b9efd4c35cbc4a915ec9) |
-| **2. ReactVM Log Processing** | Reactive Lasna (`5318007`) | State Verified on RSC | `61257228` | `637 ms` | [Reactscan ↗](https://lasna.reactscan.net/address/0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16) |
-| **3. Destination JIT Callback** | Base Sepolia (`84532`) | `0xc590233f389994ab653f36fa1ad9abab38769e51e74b9b0dd92396bce7c732d4` | `62572671` | `1,053 ms` | [Basescan ↗](https://sepolia.basescan.org/tx/0xc590233f389994ab653f36fa1ad9abab38769e51e74b9b0dd92396bce7c732d4) |
+| **1. Origin Swap Imbalance** | Base Sepolia (`84532`) | `0xabf2d8f65cb22a0c1f3ed83e905defc4777e183a44a7d09784f037e0175be1f4` | `62585514` | `1833 ms` | [Basescan ↗](https://sepolia.basescan.org/tx/0xabf2d8f65cb22a0c1f3ed83e905defc4777e183a44a7d09784f037e0175be1f4) |
+| **2. ReactVM Log Processing** | Reactive Lasna (`5318007`) | State Verified on RSC | `61257228` | `738 ms` | [Reactscan ↗](https://lasna.reactscan.net/address/0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16) |
+| **3. Destination JIT Callback** | Base Sepolia (`84532`) | `0x11e8a3a58fde97d0f88b0a8b2c6bc4c0db02389affb458f95958f73714acd9cb` | `62585524` | `1119 ms` | [Basescan ↗](https://sepolia.basescan.org/tx/0x11e8a3a58fde97d0f88b0a8b2c6bc4c0db02389affb458f95958f73714acd9cb) |
 
-**Total Measured Latency:** `~2,000 ms` roundtrip on live testnets (includes public RPC polling overhead). Sub-1.5s is the architectural target on Base Flashblocks. Reactive callbacks remove the human-in-the-loop bridging step entirely; see [`DOCS/proof-run.md`](proof-run.md).
+**Total Measured Latency:** `~3,690 ms` roundtrip on live testnets (1833 ms Origin Swap + 738 ms ReactVM + 1119 ms Destination Callback; includes public RPC submission overhead). Architectural target with Flashblock pre-confirmations: `< 1,500 ms` on Base Sepolia 200ms Flashblocks. Reactive callbacks remove the human-in-the-loop bridging step entirely; see [`DOCS/proof-run.md`](proof-run.md).
 
 ---
 

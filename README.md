@@ -32,16 +32,17 @@ Every step of the OmniSurge reactive pipeline has been verified on live testnets
 
 | Pipeline Stage | Network | Transaction Hash / State | Block Number | Measured Latency | Explorer Link |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1. Origin Swap Imbalance** | Base Sepolia (`84532`) | `0x62084cbecacdf182fa13d91ea38ca1c2a1178de21b13c1fed47252f2eb9673ef` | `62124403` | `1,607 ms` | [Basescan Tx ↗](https://sepolia.basescan.org/tx/0x62084cbecacdf182fa13d91ea38ca1c2a1178de21b13c1fed47252f2eb9673ef) |
-| **2. ReactVM Log Ingestion** | Reactive Lasna (`5318007`) | Verified State on RSC `0x51D8...cc16` | `61257228` | `612 ms` | [Reactscan RSC ↗](https://lasna.reactscan.net/address/0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16) |
-| **3. Destination JIT Settlement** | Base Sepolia (`84532`) | `0xe10b5fddc33dcc59458bff8f88dbffd5d4be389331eba9919c6ed52a9b9c0215` | `62124411` | `973 ms` | [Basescan Tx ↗](https://sepolia.basescan.org/tx/0xe10b5fddc33dcc59458bff8f88dbffd5d4be389331eba9919c6ed52a9b9c0215) |
+| **1. Origin Swap Imbalance** | Base Sepolia (`84532`) | `0xabf2d8f65cb22a0c1f3ed83e905defc4777e183a44a7d09784f037e0175be1f4` | `62585514` | `1833 ms` | [Basescan Tx ↗](https://sepolia.basescan.org/tx/0xabf2d8f65cb22a0c1f3ed83e905defc4777e183a44a7d09784f037e0175be1f4) |
+| **2. ReactVM Log Ingestion** | Reactive Lasna (`5318007`) | Verified State on RSC `0x51D8...cc16` | `61257228` | `738 ms` | [Reactscan RSC ↗](https://lasna.reactscan.net/address/0x51D8D23d4ccC0020482E359eEB7dc2C2F176cc16) |
+| **3. Destination JIT Settlement** | Base Sepolia (`84532`) | `0x11e8a3a58fde97d0f88b0a8b2c6bc4c0db02389affb458f95958f73714acd9cb` | `62585524` | `1119 ms` | [Basescan Tx ↗](https://sepolia.basescan.org/tx/0x11e8a3a58fde97d0f88b0a8b2c6bc4c0db02389affb458f95958f73714acd9cb) |
 
 **On-Chain JIT Execution Result:**
 - **Volume Protected:** `5.0 ETH`
 - **Liquidity Deployed:** `7.5 ETH` (150% coverage)
 - **Fee Captured:** `+0.015 ETH` (30 bps)
 - **Impermanent Loss Window:** `0 seconds` (atomic single-block deposit and withdrawal)
-- **Measured Roundtrip Latency:** `~2,000 ms` on live testnets (includes public RPC polling overhead); sub-1.5s is the architecture target with Flashblocks
+- **Measured Roundtrip Latency:** `~3,690 ms` on live testnets (sum of measured stages: 1833 ms Origin Swap + 738 ms ReactVM + 1119 ms Destination Callback; includes public RPC submission overhead)
+- **Architectural Target with Flashblock Pre-Confirmations:** `< 1,500 ms` on Base Sepolia 200ms Flashblocks
 
 Reactive callbacks remove the human-in-the-loop bridging step entirely; see [`DOCS/proof-run.md`](DOCS/proof-run.md) for full transaction evidence.
 

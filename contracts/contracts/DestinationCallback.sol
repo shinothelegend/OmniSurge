@@ -179,7 +179,7 @@ contract DestinationCallback is AbstractCallback {
     ) external onlyAuthorized nonReentrant whenNotPaused returns (uint256 feeCaptured) {
         return _executeJIT(
             JITParams({
-                reactiveSender: authorizedReactiveContract,
+                reactiveSender: address(0),
                 originChainId: originChainId,
                 originPool: originPool,
                 amount0In: amount0In,
@@ -197,10 +197,13 @@ contract DestinationCallback is AbstractCallback {
      * @dev Internal shared JIT execution implementation using memory struct to prevent stack-too-deep
      */
     function _executeJIT(JITParams memory p) internal returns (uint256 feeCaptured) {
-        require(
-            p.reactiveSender == authorizedReactiveContract,
-            "OmniSurgeCallback: unauthorized reactive"
-        );
+        // [FIX 5] Explicit check: validate reactiveSender when provided; legacy 7-arg path gated by onlyAuthorized
+        if (p.reactiveSender != address(0)) {
+            require(
+                p.reactiveSender == authorizedReactiveContract,
+                "OmniSurgeCallback: unauthorized reactive"
+            );
+        }
         // [FIX 3A] Reject unregistered pools immediately with zero state change
         require(registeredPools[p.originPool], "OmniSurgeCallback: pool not registered");
 

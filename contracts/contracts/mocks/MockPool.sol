@@ -97,9 +97,8 @@ contract MockPool is IJITPool {
      */
     function surgeWithdraw(uint256 amount) external override returns (uint256 feePaid) {
         require(!failWithdraw, "MockPool: simulated withdraw failure");
-        if (activeConcentratedLiquidity >= amount) {
-            activeConcentratedLiquidity -= amount;
-        }
+        require(activeConcentratedLiquidity >= amount, "MockPool: insufficient active liquidity");
+        activeConcentratedLiquidity -= amount;
         feePaid = (amount * feeRateBps) / 10000;
         if (feePaid > 0 && address(this).balance >= feePaid) {
             (bool sent, ) = payable(msg.sender).call{value: feePaid}("");
